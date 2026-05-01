@@ -1,39 +1,410 @@
-name: 🏆 MF Complete Rankings — All Categories
+"""
+All Mutual Funds Complete Ranker - v5 Final
+Source: captn3m0/historical-mf-data (SQLite database)
+No third-party API dependency - works fully in GitHub Actions
+"""
 
-on:
-  schedule:
-    - cron: "30 17 * * 1-5"   # 11:00 PM IST = 5:30 PM UTC, Mon–Fri
-  workflow_dispatch:
+import requests
+import pandas as pd
+import numpy as np
+import sqlite3
+import subprocess
+import os
+from datetime import datetime
+from openpyxl import Workbook
+from openpyxl.styles import Font, PatternFill, Alignment, Border, Side
+from openpyxl.utils import get_column_letter
 
-jobs:
-  rank-all-funds:
-    runs-on: ubuntu-latest
-    timeout-minutes: 60
+print("=" * 65)
+print("  MUTUAL FUND RANKER v5 - Historical DB Edition")
+print("=" * 65)
+print("  Run date: " + datetime.now().strftime("%d %b %Y %H:%M IST"))
 
-    permissions:
-      contents: write
+DB_FILE  = "funds.db"
+ZST_FILE = "funds.db.zst"
+DB_URL   = "https://github.com/captn3m0/historical-mf-data/releases/latest/download/funds.db.zst"
 
-    steps:
+CATEGORIES = [
+    ("Large Cap",           ["large cap", "bluechip", "blue chip"],                    ["mid", "small", "multi", "flexi", "index", "etf"]),
+    ("Mid Cap",             ["mid cap", "midcap", "emerging bluechip"],                ["small", "large", "multi", "flexi", "index", "etf"]),
+    ("Small Cap",           ["small cap", "smallcap"],                                 ["multi", "flexi", "index", "etf"]),
+    ("Flexi Cap",           ["flexi cap", "flexicap"],                                 ["index", "etf"]),
+    ("Multi Cap",           ["multicap", "multi cap"],                                 ["flexi", "index", "etf"]),
+    ("Large and Mid Cap",   ["large & mid", "large and mid", "large midcap"],          ["index", "etf", "small"]),
+    ("ELSS Tax Saving",     ["elss", "tax saver", "taxsaver", "tax saving", "long term equity fund"], ["index", "etf"]),
+    ("Aggressive Hybrid",   ["aggressive hybrid", "equity hybrid", "equity & debt"],   ["balanced advantage", "index", "etf"]),
+    ("Balanced Advantage",  ["balanced advantage", "dynamic asset"],                   ["index", "etf"]),
+    ("Index Nifty 50",      ["nifty 50 index", "nifty50 index"],                       ["next 50", "nifty 500", "nifty 100"]),
+    ("Index Nifty Next 50", ["nifty next 50 index", "nifty next50"],                   []),
+    ("Index Nifty 100",     ["nifty 100 index", "nifty100 index"],                     ["200", "500"]),
+    ("Sectoral IT",         ["technology fund", "it fund", "digital india"],           ["index", "etf"]),
+    ("Sectoral Banking",    ["banking & financial", "banking and financial"],           ["index", "etf"]),
+    ("Debt Liquid",         ["liquid fund"],                                            ["etf", "overnight"]),
+    ("Debt Short Duration", ["short term fund", "short duration fund"],                 ["etf", "ultra"]),
+    ("Debt Corporate Bond", ["corporate bond fund"],                                    ["etf"]),
+    ("International",       ["us equity", "us bluechip", "nasdaq 100"],                ["etf"]),
+]
 
-      - name: 📥 Checkout Repository
-        uses: actions/checkout@v3
+def download_db():
+    try:
+        import zstandard
+    except ImportError:
+        print("  Installing zstandard...")
+        subprocess.run(["pip", "install", "zstandard", "-q"], check=True)
+        import zstandard
 
-      - name: 🐍 Setup Python 3.11
-        uses: actions/setup-python@v4
-        with:
-          python-version: "3.11"
+    print("\nDownloading historical MF database...")
+    headers = {"User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36"}
+    with requests.get(DB_URL, headers=headers, stream=True, timeout=300) as r:
+        r.raise_for_status()
+        total = int(r.headers.get("content-length", 0))
+        downloaded = 0
+        with open(ZST_FILE, "wb") as f:
+            for chunk in r.iter_content(chunk_size=1024 * 1024):
+                f.write(chunk)
+                downloaded += len(chunk)
+                if total:
+                    pct = round(downloaded / total * 100)
+                    bar = "#" * (pct // 5) + "-" * (20 - pct // 5)
+                    print(f"\r  [{bar}] {pct}%  {downloaded/1024/1024:.1f} MB", end="", flush=True)
+    print(f"\n  Downloaded: {downloaded/1024/1024:.1f} MB")
+    print("  Extracting...")
+    import zstandard as zstd
+    with open(ZST_FILE, "rb") as fh:
+        dctx = zstd.ZstdDecompressor()
+        with open(DB_FILE, "wb") as out:
+            dctx.copy_stream(fh, out)
+    size_mb = os.path.getsize(DB_FILE) / 1024 / 1024
+    print(f"  Database ready: {size_mb:.0f} MB")
+    os.remove(ZST_FILE)
+    return True
 
-      - name: 📦 Install Libraries
-        run: |
-          pip install requests pandas numpy openpyxl zstandard
+def get_relevant_schemes(conn):
+    print("\nFinding relevant Direct Growth funds...")
+    df = pd.read_sql_query("SELECT DISTINCT scheme_code, name FROM securities WHERE name IS NOT NULL", conn)
+    print(f"  Total securities: {len(df):,}")
+    categorized = {cat[0]: [] for cat in CATEGORIES}
+    for _, row in df.iterrows():
+        name_l = str(row["name"]).lower()
+        if "direct" not in name_l:
+            continue
+        if "growth" not in name_l and not name_l.endswith(" gr"):
+            continue
+        if any(s in name_l for s in ["idcw", "dividend", "bonus", "weekly", "monthly", "regular"]):
+            continue
+        for cat_name, must_have, must_not in CATEGORIES:
+            if len(categorized[cat_name]) >= 20:
+                continue
+            if any(kw in name_l for kw in must_have):
+                if not any(kw in name_l for kw in must_not):
+                    categorized[cat_name].append({"code": int(row["scheme_code"]), "name": str(row["name"])})
+                    break
+    total = sum(len(v) for v in categorized.values())
+    for cat, funds in categorized.items():
+        if funds:
+            print(f"  {cat}: {len(funds)} funds")
+    print(f"  Total: {total} funds across {len([c for c in categorized.values() if c])} categories")
+    return categorized
 
-      - name: 🚀 Run Complete MF Ranker
-        run: python all_funds_ranker.py
+def load_nav(conn, scheme_code):
+    df = pd.read_sql_query("SELECT date, nav FROM nav WHERE scheme_code = ? ORDER BY date ASC", conn, params=(scheme_code,))
+    if df.empty:
+        return None
+    df["date"] = pd.to_datetime(df["date"])
+    df["nav"]  = pd.to_numeric(df["nav"], errors="coerce")
+    df = df.dropna().sort_values("date").reset_index(drop=True)
+    return df if len(df) >= 30 else None
 
-      - name: 💾 Commit & Push Results
-        run: |
-          git config user.name  "github-actions[bot]"
-          git config user.email "github-actions[bot]@users.noreply.github.com"
-          git add output/
-          git diff --staged --quiet || git commit -m "🏆 MF Rankings Updated — $(date +'%d %b %Y')"
-          git push
+def cagr(nav, years):
+    try:
+        days = int(years * 365)
+        if len(nav) < days: return None
+        s, e = nav.iloc[-days], nav.iloc[-1]
+        return round(((e / s) ** (1 / years) - 1) * 100, 2) if s > 0 else None
+    except Exception: return None
+
+def sharpe(nav, rf=0.065):
+    try:
+        dr = nav.pct_change().dropna()
+        if len(dr) < 30: return None
+        ann_r = dr.mean() * 252
+        ann_s = dr.std() * (252 ** 0.5)
+        return round((ann_r - rf) / ann_s, 3) if ann_s > 0 else None
+    except Exception: return None
+
+def sortino(nav, rf=0.065):
+    try:
+        dr = nav.pct_change().dropna()
+        if len(dr) < 30: return None
+        ann_r = dr.mean() * 252
+        down  = dr[dr < 0].std() * (252 ** 0.5)
+        return round((ann_r - rf) / down, 3) if down > 0 else None
+    except Exception: return None
+
+def max_drawdown(nav):
+    try:
+        return round(((nav - nav.cummax()) / nav.cummax() * 100).min(), 2)
+    except Exception: return None
+
+def volatility(nav):
+    try:
+        dr = nav.pct_change().dropna()
+        return round(dr.std() * (252 ** 0.5) * 100, 2) if len(dr) >= 30 else None
+    except Exception: return None
+
+def sip_return(nav_df, years):
+    try:
+        nav_s = nav_df.set_index("date")["nav"]
+        days  = int(years * 365)
+        if len(nav_s) < days: return None
+        sub     = nav_s.iloc[-days:]
+        monthly = sub.resample("MS").first().dropna()
+        if len(monthly) < 6: return None
+        units = sum(1000 / n for n in monthly.values)
+        inv   = len(monthly) * 1000
+        return round(((units * nav_s.iloc[-1] / inv) ** (1 / years) - 1) * 100, 2)
+    except Exception: return None
+
+def rolling_avg(nav, years):
+    try:
+        w = int(years * 365)
+        v = nav.values
+        if len(v) < w + 30: return None
+        res = [((v[i] / v[i - w]) ** (1 / years) - 1) * 100 for i in range(w, len(v)) if v[i - w] > 0]
+        return round(np.mean(res), 2) if res else None
+    except Exception: return None
+
+def compute_metrics(conn, scheme, category):
+    nav_df = load_nav(conn, scheme["code"])
+    if nav_df is None: return None
+    nav  = nav_df["nav"]
+    life = max((nav_df["date"].max() - nav_df["date"].min()).days / 365, 0.01)
+    since_inc = round(((nav.iloc[-1] / nav.iloc[0]) ** (1 / life) - 1) * 100, 2) if nav.iloc[0] > 0 else None
+    return {
+        "Category":            category,
+        "Fund Name":           scheme["name"],
+        "Scheme Code":         scheme["code"],
+        "Latest NAV (Rs)":     round(nav.iloc[-1], 2),
+        "NAV Date":            nav_df["date"].max().strftime("%d-%b-%Y"),
+        "Launch Date":         nav_df["date"].min().strftime("%d-%b-%Y"),
+        "History Days":        len(nav_df),
+        "1Y Return (%)":       cagr(nav, 1),
+        "3Y Return (%)":       cagr(nav, 3),
+        "5Y Return (%)":       cagr(nav, 5),
+        "10Y Return (%)":      cagr(nav, 10),
+        "Since Inception (%)": since_inc,
+        "SIP 1Y (%)":          sip_return(nav_df, 1),
+        "SIP 3Y (%)":          sip_return(nav_df, 3),
+        "SIP 5Y (%)":          sip_return(nav_df, 5),
+        "Avg Rolling 1Y (%)":  rolling_avg(nav, 1),
+        "Avg Rolling 3Y (%)":  rolling_avg(nav, 3),
+        "Sharpe Ratio":        sharpe(nav),
+        "Sortino Ratio":       sortino(nav),
+        "Volatility (%)":      volatility(nav),
+        "Max Drawdown (%)":    max_drawdown(nav),
+        "_score":              0.0,
+    }
+
+def compute_score(row):
+    weights = {"3Y Return (%)": 0.25, "5Y Return (%)": 0.25, "Sharpe Ratio": 0.20,
+               "Sortino Ratio": 0.15, "Avg Rolling 3Y (%)": 0.10, "SIP 5Y (%)": 0.05}
+    s = 0.0
+    for col, w in weights.items():
+        v = row.get(col)
+        if v is not None:
+            try: s += float(v) * w
+            except (TypeError, ValueError): pass
+    return round(s, 4)
+
+NAVY  = "1B3A6B"; GOLD  = "E8A020"; GREEN = "27AE60"; RED   = "E74C3C"
+AMBER = "F39C12"; WHITE = "FFFFFF"; LGRAY = "F5F7FA"; DGRAY = "2C3E50"; SILV  = "BDC3C7"
+
+def fill(c): return PatternFill("solid", fgColor=c)
+def bdr():
+    s = Side(style="thin", color="D5D5D5")
+    return Border(left=s, right=s, top=s, bottom=s)
+def rc(v):
+    try: f=float(v); return GREEN if f>=12 else (AMBER if f>=6 else RED)
+    except (TypeError, ValueError): return "888888"
+
+COLS = [
+    ("Rank",         None,                  6),
+    ("Fund Name",    "Fund Name",           44),
+    ("NAV Rs",       "Latest NAV (Rs)",     10),
+    ("NAV Date",     "NAV Date",            12),
+    ("Days",         "History Days",         7),
+    ("1Y Ret %",     "1Y Return (%)",        9),
+    ("3Y Ret %",     "3Y Return (%)",        9),
+    ("5Y Ret %",     "5Y Return (%)",        9),
+    ("10Y Ret %",    "10Y Return (%)",       9),
+    ("Since Inc %",  "Since Inception (%)", 11),
+    ("SIP 1Y %",     "SIP 1Y (%)",           9),
+    ("SIP 3Y %",     "SIP 3Y (%)",           9),
+    ("SIP 5Y %",     "SIP 5Y (%)",           9),
+    ("Roll 1Y %",    "Avg Rolling 1Y (%)",  10),
+    ("Roll 3Y %",    "Avg Rolling 3Y (%)",  10),
+    ("Sharpe",       "Sharpe Ratio",         9),
+    ("Sortino",      "Sortino Ratio",        9),
+    ("Volatility %", "Volatility (%)",      12),
+    ("Max DD %",     "Max Drawdown (%)",    10),
+    ("Launch",       "Launch Date",         13),
+    ("Code",         "Scheme Code",         13),
+    ("Score",        "_score",               9),
+]
+RET_COLS = {6, 7, 8, 9, 10, 11, 12, 13, 14, 15}
+
+def write_headers(ws, row_num, bg=NAVY):
+    for c, (h, _, w) in enumerate(COLS, 1):
+        cell = ws.cell(row=row_num, column=c, value=h)
+        cell.font      = Font(name="Arial", bold=True, size=9, color=WHITE)
+        cell.fill      = fill(bg)
+        cell.alignment = Alignment(horizontal="center", vertical="center", wrap_text=True)
+        cell.border    = bdr()
+        ws.column_dimensions[get_column_letter(c)].width = w
+    ws.row_dimensions[row_num].height = 28
+
+def write_fund_row(ws, row_num, rank, fund_data, bg=WHITE):
+    vals = [str(rank)] + [fund_data.get(key) for _, key, _ in COLS[1:]]
+    for c, val in enumerate(vals, 1):
+        cell = ws.cell(row=row_num, column=c, value=val)
+        cell.fill      = fill(bg)
+        cell.border    = bdr()
+        cell.font      = Font(name="Arial", size=9)
+        cell.alignment = Alignment(vertical="center", horizontal="left" if c == 2 else "center")
+        if c in RET_COLS:
+            cell.font = Font(name="Arial", size=9, color=rc(val))
+        if c == 19:
+            cell.font = Font(name="Arial", size=9, color=RED)
+    ws.row_dimensions[row_num].height = 16
+
+def build_excel(all_results, all_top5, path):
+    wb = Workbook()
+    ws = wb.active
+    ws.title = "Summary Dashboard"
+    ws.sheet_view.showGridLines = False
+    ws.merge_cells("A1:V1")
+    ws["A1"] = "  MUTUAL FUND RANKINGS - ALL CATEGORIES"
+    ws["A1"].font      = Font(name="Arial", bold=True, size=15, color=WHITE)
+    ws["A1"].fill      = fill(NAVY)
+    ws["A1"].alignment = Alignment(vertical="center")
+    ws.row_dimensions[1].height = 36
+    ws.merge_cells("A2:V2")
+    ws["A2"] = ("  Generated: " + datetime.now().strftime("%d %b %Y %H:%M IST") +
+                "  |  Source: captn3m0/historical-mf-data  |  Direct Growth only" +
+                "  |  Score = 3Y(25%) + 5Y(25%) + Sharpe(20%) + Sortino(15%) + Roll3Y(10%) + SIP5Y(5%)")
+    ws["A2"].font      = Font(name="Arial", size=8, color=SILV)
+    ws["A2"].fill      = fill(DGRAY)
+    ws["A2"].alignment = Alignment(vertical="center")
+    ws.row_dimensions[2].height = 16
+    write_headers(ws, 3, GOLD)
+    sr = 4
+    for cat, top5 in all_top5.items():
+        ws.merge_cells(f"A{sr}:V{sr}")
+        ws[f"A{sr}"]           = "  " + cat
+        ws[f"A{sr}"].font      = Font(name="Arial", bold=True, size=10, color=WHITE)
+        ws[f"A{sr}"].fill      = fill(NAVY)
+        ws[f"A{sr}"].alignment = Alignment(vertical="center")
+        ws.row_dimensions[sr].height = 20
+        sr += 1
+        for i, f in enumerate(top5):
+            write_fund_row(ws, sr, i + 1, f, LGRAY if i % 2 == 0 else WHITE)
+            sr += 1
+        sr += 1
+    ws.freeze_panes = "B4"
+    for cat, top5 in all_top5.items():
+        safe_name = cat[:31].replace("/", "-").replace("&", "and")
+        cs = wb.create_sheet(title=safe_name)
+        cs.sheet_view.showGridLines = False
+        cs.merge_cells("A1:V1")
+        cs["A1"]           = "  " + cat
+        cs["A1"].font      = Font(name="Arial", bold=True, size=13, color=WHITE)
+        cs["A1"].fill      = fill(NAVY)
+        cs["A1"].alignment = Alignment(vertical="center")
+        cs.row_dimensions[1].height = 30
+        write_headers(cs, 2, GOLD)
+        cat_all = sorted([r for r in all_results if r.get("Category") == cat],
+                         key=lambda x: x.get("_score", 0), reverse=True)
+        medal_fills = ["FFF9E6", "F5F5F5", "FFF0E8", WHITE, WHITE]
+        for i, f in enumerate(cat_all):
+            bg = medal_fills[i] if i < 5 else (LGRAY if i % 2 == 0 else WHITE)
+            write_fund_row(cs, i + 3, i + 1, f, bg)
+        cs.freeze_panes = "B3"
+    wb.save(path)
+    print(f"  Excel saved: {path}")
+
+def main():
+    os.makedirs("output", exist_ok=True)
+    if not os.path.exists(DB_FILE):
+        if not download_db():
+            print("ERROR: Database download failed.")
+            return
+    else:
+        print(f"\nUsing existing database: {os.path.getsize(DB_FILE)/1024/1024:.0f} MB")
+
+    print("\nConnecting to database...")
+    conn      = sqlite3.connect(DB_FILE)
+    tables    = pd.read_sql_query("SELECT name FROM sqlite_master WHERE type='table'", conn)
+    nav_count = pd.read_sql_query("SELECT COUNT(*) as cnt FROM nav", conn).iloc[0, 0]
+    print(f"  Tables: {', '.join(tables['name'].tolist())}")
+    print(f"  NAV records: {nav_count:,}")
+
+    categorized = get_relevant_schemes(conn)
+    all_results, all_top5 = [], {}
+    total, done = sum(len(v) for v in categorized.values()), 0
+
+    print(f"\nComputing metrics for {total} funds...\n")
+
+    for category, fund_list in categorized.items():
+        if not fund_list: continue
+        print("\n" + "-" * 55)
+        print(f"  {category}  ({len(fund_list)} funds)")
+        print("-" * 55)
+        cat_results = []
+        for scheme in fund_list:
+            metrics = compute_metrics(conn, scheme, category)
+            done += 1
+            if metrics:
+                metrics["_score"] = compute_score(metrics)
+                cat_results.append(metrics)
+                print(f"  [{done:>3}/{total}] OK  {scheme['name'][:50]}  1Y:{metrics['1Y Return (%)']}%  Sharpe:{metrics['Sharpe Ratio']}")
+            else:
+                print(f"  [{done:>3}/{total}] --  {scheme['name'][:50]}")
+        if cat_results:
+            all_results.extend(cat_results)
+            ranked = sorted(cat_results, key=lambda x: x["_score"], reverse=True)
+            all_top5[category] = ranked[:5]
+            print(f"\n  #1 -- {ranked[0]['Fund Name'][:50]}")
+            print(f"       3Y:{ranked[0]['3Y Return (%)']}%  5Y:{ranked[0]['5Y Return (%)']}%  Sharpe:{ranked[0]['Sharpe Ratio']}")
+
+    conn.close()
+    if os.path.exists(DB_FILE):
+        os.remove(DB_FILE)
+        print("\nDatabase removed to save space")
+
+    if not all_results:
+        print("ERROR: No results.")
+        return
+
+    df = pd.DataFrame(all_results)
+    df.drop(columns=["_score"], errors="ignore").to_csv("output/all_funds_metrics.csv", index=False)
+    print(f"\nSaved: output/all_funds_metrics.csv  ({len(df)} funds)")
+
+    t5_rows = []
+    for cat, funds in all_top5.items():
+        for i, f in enumerate(funds):
+            r = f.copy(); r["Rank"] = i + 1; t5_rows.append(r)
+    pd.DataFrame(t5_rows).drop(columns=["_score"], errors="ignore").to_csv("output/top5_per_category.csv", index=False)
+    print(f"Saved: output/top5_per_category.csv  ({len(t5_rows)} entries)")
+
+    print("\nBuilding Excel report...")
+    build_excel(all_results, all_top5, "output/MF_Top5_Rankings.xlsx")
+
+    print("\n" + "=" * 65)
+    print(f"  DONE!  {len(all_results)} funds  |  {len(all_top5)} categories")
+    print(f"  output/MF_Top5_Rankings.xlsx")
+    print(f"  output/all_funds_metrics.csv")
+    print(f"  output/top5_per_category.csv")
+    print("=" * 65)
+
+if __name__ == "__main__":
+    main()
