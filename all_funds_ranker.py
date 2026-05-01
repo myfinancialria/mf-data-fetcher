@@ -1,9 +1,10 @@
 """
 ================================================================
-  ALL MUTUAL FUNDS — COMPLETE RANKER
-  Fetches 200+ funds across all SEBI categories
-  Computes all metrics → Ranks top 5 per category
-  Output: Beautiful Excel report + CSV files
+  ALL MUTUAL FUNDS — COMPLETE RANKER (FIXED v2)
+  - Fetches real scheme codes dynamically from AMFI
+  - Categorizes funds by name keywords
+  - Computes all metrics with bulletproof error handling
+  - Builds formatted Excel report
 ================================================================
 """
 
@@ -14,398 +15,240 @@ import time
 import os
 from datetime import datetime, timedelta
 from openpyxl import Workbook
-from openpyxl.styles import (
-    Font, PatternFill, Alignment, Border, Side, GradientFill
-)
+from openpyxl.styles import Font, PatternFill, Alignment, Border, Side
 from openpyxl.utils import get_column_letter
 
 print("=" * 65)
-print("  MUTUAL FUND COMPLETE RANKER — ALL CATEGORIES")
+print("  MUTUAL FUND COMPLETE RANKER v2 — ALL CATEGORIES")
 print("=" * 65)
 
 # ================================================================
-# MASTER FUND LIST — 200+ funds across all SEBI categories
-# Only Direct - Growth plans (lower expense ratio)
+# STEP 1: FETCH ALL SCHEME CODES FROM AMFI (always free & works)
 # ================================================================
 
-ALL_FUNDS = {
+# Category rules — keyword matches against scheme name
+# Each tuple: (display_name, must_contain_all, must_not_contain)
+CATEGORY_RULES = [
+    ("Large Cap",          ["large cap", "bluechip", "blue chip"],          ["mid", "small", "multi", "flexi", "index", "etf"]),
+    ("Mid Cap",            ["mid cap", "midcap", "emerging bluechip"],       ["small", "large", "multi", "flexi", "index", "etf"]),
+    ("Small Cap",          ["small cap", "smallcap"],                        ["multi", "flexi", "index", "etf"]),
+    ("Flexi Cap",          ["flexi cap", "flexicap", "multi cap fund"],      ["index", "etf"]),
+    ("Multi Cap",          ["multicap", "multi cap"],                        ["index", "etf", "flexi"]),
+    ("Large & Mid Cap",    ["large & mid", "large and mid", "large midcap"], ["index", "etf", "small"]),
+    ("ELSS / Tax Saving",  ["elss", "tax saver", "taxsaver", "long term equity fund", "tax saving"], ["index", "etf"]),
+    ("Aggressive Hybrid",  ["aggressive hybrid", "equity hybrid", "equity & debt", "equity and debt"], ["index", "etf", "balanced advantage"]),
+    ("Balanced Advantage", ["balanced advantage", "dynamic asset"],          ["index", "etf"]),
+    ("Index — Nifty 50",   ["nifty 50 index", "nifty50 index", "nifty 50 etf"], ["next 50", "nifty 500", "nifty 100"]),
+    ("Index — Nifty 100",  ["nifty 100 index", "nifty100 index"],            ["200", "500"]),
+    ("Index — Nifty 500",  ["nifty 500 index", "nifty500 index"],            []),
+    ("Sectoral — IT",      ["technology fund", "it fund", "digital india"],  ["index", "etf"]),
+    ("Sectoral — Banking", ["banking & financial", "banking and financial"],  ["index", "etf"]),
+    ("Debt — Liquid",      ["liquid fund"],                                   ["etf", "overnight"]),
+    ("Debt — Short Dur",   ["short term fund", "short duration"],             ["etf", "ultra"]),
+    ("Debt — Corp Bond",   ["corporate bond fund"],                           ["etf"]),
+    ("International",      ["us equity", "us bluechip", "nasdaq", "global fund", "overseas", "us opportunities"], ["etf"]),
+]
 
-    "Large Cap": [
-        (120503, "Mirae Asset Large Cap Fund"),
-        (119598, "Axis Bluechip Fund"),
-        (118825, "ICICI Pru Bluechip Fund"),
-        (100016, "HDFC Top 100 Fund"),
-        (118989, "HDFC Large Cap Fund"),
-        (119247, "SBI Bluechip Fund"),
-        (119775, "Kotak Bluechip Fund"),
-        (120504, "Nippon India Large Cap Fund"),
-        (118534, "Franklin India Bluechip Fund"),
-        (120255, "DSP Top 100 Equity Fund"),
-        (118701, "Canara Robeco Bluechip Equity Fund"),
-        (119270, "UTI Large Cap Fund"),
-        (118959, "Tata Large Cap Fund"),
-        (120177, "Aditya Birla SL Frontline Equity Fund"),
-        (119028, "IDFC Large Cap Fund"),
-    ],
-
-    "Mid Cap": [
-        (120505, "Mirae Asset Emerging Bluechip Fund"),
-        (118989, "HDFC Mid-Cap Opportunities Fund"),
-        (119597, "Axis Midcap Fund"),
-        (120823, "Kotak Emerging Equity Fund"),
-        (118701, "Nippon India Growth Fund"),
-        (120177, "Aditya Birla SL Midcap Fund"),
-        (119270, "UTI Mid Cap Fund"),
-        (118959, "Tata Midcap Growth Fund"),
-        (119028, "IDFC Emerging Businesses Fund"),
-        (120255, "DSP Midcap Fund"),
-        (119247, "SBI Magnum Midcap Fund"),
-        (118825, "ICICI Pru MidCap Fund"),
-        (120828, "Edelweiss Midcap Fund"),
-        (118534, "Franklin India Prima Fund"),
-        (120503, "Invesco India Midcap Fund"),
-    ],
-
-    "Small Cap": [
-        (120828, "SBI Small Cap Fund"),
-        (135781, "Axis Small Cap Fund"),
-        (118701, "Nippon India Small Cap Fund"),
-        (120505, "Kotak Small Cap Fund"),
-        (118989, "HDFC Small Cap Fund"),
-        (120177, "Aditya Birla SL Small Cap Fund"),
-        (119597, "DSP Small Cap Fund"),
-        (120255, "Franklin India Smaller Companies Fund"),
-        (118825, "ICICI Pru Smallcap Fund"),
-        (119775, "Canara Robeco Small Cap Fund"),
-        (120503, "Tata Small Cap Fund"),
-        (119247, "HSBC Small Cap Fund"),
-        (119028, "Union Small Cap Fund"),
-        (120823, "Quant Small Cap Fund"),
-    ],
-
-    "Flexi Cap": [
-        (125497, "Parag Parikh Flexi Cap Fund"),
-        (119775, "Kotak Flexicap Fund"),
-        (118534, "Franklin India Flexi Cap Fund"),
-        (120177, "Aditya Birla SL Flexi Cap Fund"),
-        (119270, "UTI Flexi Cap Fund"),
-        (118825, "ICICI Pru Flexicap Fund"),
-        (119597, "Axis Flexi Cap Fund"),
-        (120255, "DSP Flexi Cap Fund"),
-        (118959, "Tata Flexi Cap Fund"),
-        (120503, "Mirae Asset Flexi Cap Fund"),
-        (118989, "HDFC Flexi Cap Fund"),
-        (120828, "Canara Robeco Flexi Cap Fund"),
-        (119247, "SBI Flexicap Fund"),
-        (119028, "JM Flexicap Fund"),
-    ],
-
-    "Multi Cap": [
-        (120823, "Quant Active Fund"),
-        (118825, "ICICI Pru Multicap Fund"),
-        (120177, "Aditya Birla SL Equity Advantage Fund"),
-        (119270, "UTI Multi Cap Fund"),
-        (120255, "DSP Multicap Fund"),
-        (118534, "Franklin India Equity Advantage Fund"),
-        (119775, "Kotak Multicap Fund"),
-        (118701, "Nippon India Multicap Fund"),
-        (119247, "SBI Multicap Fund"),
-        (119597, "Axis Multicap Fund"),
-    ],
-
-    "Large & Mid Cap": [
-        (120505, "Mirae Asset Large & Midcap Fund"),
-        (119597, "Axis Growth Opportunities Fund"),
-        (118825, "ICICI Pru Large & Mid Cap Fund"),
-        (119775, "Kotak Equity Opportunities Fund"),
-        (118989, "HDFC Large and Mid Cap Fund"),
-        (120177, "Aditya Birla SL Equity Advantage Fund"),
-        (119247, "SBI Large & Midcap Fund"),
-        (120255, "DSP Equity Opportunities Fund"),
-        (118534, "Franklin India Equity Advantage Fund"),
-        (118701, "Canara Robeco Emerging Equities Fund"),
-        (119028, "IDFC Core Equity Fund"),
-    ],
-
-    "ELSS / Tax Saving": [
-        (122639, "Mirae Asset Tax Saver Fund"),
-        (120503, "Axis Long Term Equity Fund"),
-        (118825, "ICICI Pru Long Term Equity Fund"),
-        (120177, "Aditya Birla SL Tax Relief 96"),
-        (119247, "SBI Long Term Equity Fund"),
-        (118989, "HDFC Tax Saver Fund"),
-        (119775, "Kotak Tax Saver Fund"),
-        (118701, "Nippon India Tax Saver Fund"),
-        (118534, "Franklin India Taxshield"),
-        (119597, "DSP Tax Saver Fund"),
-        (119270, "UTI Long Term Equity Fund"),
-        (118959, "Tata India Tax Savings Fund"),
-        (120823, "Quant Tax Plan"),
-        (119028, "Canara Robeco Equity Tax Saver Fund"),
-    ],
-
-    "Aggressive Hybrid": [
-        (118989, "HDFC Hybrid Equity Fund"),
-        (118825, "ICICI Pru Equity & Debt Fund"),
-        (120177, "Aditya Birla SL Equity Hybrid 95 Fund"),
-        (119247, "SBI Equity Hybrid Fund"),
-        (119775, "Kotak Equity Hybrid Fund"),
-        (118534, "Franklin India Equity Hybrid Fund"),
-        (119597, "DSP Equity & Bond Fund"),
-        (119270, "UTI Aggressive Hybrid Fund"),
-        (120255, "Canara Robeco Equity Hybrid Fund"),
-        (118701, "Nippon India Equity Hybrid Fund"),
-        (120823, "Quant Absolute Fund"),
-        (118959, "Tata Hybrid Equity Fund"),
-    ],
-
-    "Balanced Advantage": [
-        (118825, "ICICI Pru Balanced Advantage Fund"),
-        (118989, "HDFC Balanced Advantage Fund"),
-        (120177, "Aditya Birla SL Balanced Advantage Fund"),
-        (119247, "SBI Balanced Advantage Fund"),
-        (119775, "Kotak Balanced Advantage Fund"),
-        (118534, "Franklin India Balanced Advantage Fund"),
-        (119597, "Axis Balanced Advantage Fund"),
-        (118701, "Nippon India Balanced Advantage Fund"),
-        (119270, "UTI Balanced Advantage Fund"),
-        (120823, "Edelweiss Balanced Advantage Fund"),
-    ],
-
-    "Index Funds — Nifty 50": [
-        (145552, "Navi Nifty 50 Index Fund"),
-        (120716, "UTI Nifty 50 Index Fund"),
-        (118825, "ICICI Pru Nifty 50 Index Fund"),
-        (119247, "SBI Nifty Index Fund"),
-        (119775, "Kotak Nifty 50 Index Fund"),
-        (118989, "HDFC Index Fund - Nifty 50 Plan"),
-        (120177, "Aditya Birla SL Nifty 50 Index Fund"),
-        (118701, "Nippon India Index Fund - Nifty 50 Plan"),
-        (120255, "DSP Nifty 50 Index Fund"),
-        (119597, "Tata Nifty50 Index Fund"),
-    ],
-
-    "Index Funds — Nifty Next 50": [
-        (118825, "ICICI Pru Nifty Next 50 Index Fund"),
-        (119247, "SBI Nifty Next 50 Index Fund"),
-        (120716, "UTI Nifty Next 50 Index Fund"),
-        (119775, "Kotak Nifty Next 50 Index Fund"),
-        (118701, "Nippon India Nifty Next 50 Jr BeES FoF"),
-        (118989, "HDFC Nifty Next 50 Index Fund"),
-    ],
-
-    "Sectoral — Technology": [
-        (118825, "ICICI Pru Technology Fund"),
-        (120177, "Aditya Birla SL Digital India Fund"),
-        (119247, "SBI Technology Opportunities Fund"),
-        (118534, "Franklin India Technology Fund"),
-        (118701, "Nippon India ETF Nifty IT"),
-        (119775, "Kotak Technology ETF"),
-    ],
-
-    "Sectoral — Banking": [
-        (118825, "ICICI Pru Banking & Financial Services Fund"),
-        (120177, "Aditya Birla SL Banking & Financial Services Fund"),
-        (119247, "SBI Banking & Financial Services Fund"),
-        (119597, "DSP Banking & Financial Services Fund"),
-        (118701, "Nippon India Banking & Financial Services Fund"),
-        (119775, "Kotak Banking ETF"),
-    ],
-
-    "Debt — Short Duration": [
-        (118825, "ICICI Pru Short Term Fund"),
-        (119247, "SBI Short Term Debt Fund"),
-        (120177, "Aditya Birla SL Short Term Fund"),
-        (119775, "Kotak Bond Short Term Plan"),
-        (118701, "Nippon India Short Term Fund"),
-        (118534, "Franklin India Short Term Income Plan"),
-        (119270, "UTI Short Duration Fund"),
-        (118989, "HDFC Short Term Debt Fund"),
-        (120255, "DSP Short Term Fund"),
-    ],
-
-    "Debt — Corporate Bond": [
-        (118825, "ICICI Pru Corporate Bond Fund"),
-        (119247, "SBI Corporate Bond Fund"),
-        (120177, "Aditya Birla SL Corporate Bond Fund"),
-        (119775, "Kotak Corporate Bond Fund"),
-        (118701, "Nippon India Corporate Bond Fund"),
-        (118989, "HDFC Corporate Bond Fund"),
-        (119270, "UTI Corporate Bond Fund"),
-        (118534, "Franklin India Corporate Debt Fund"),
-    ],
-
-    "Debt — Liquid": [
-        (118825, "ICICI Pru Liquid Fund"),
-        (119247, "SBI Liquid Fund"),
-        (120177, "Aditya Birla SL Liquid Fund"),
-        (119775, "Kotak Liquid Fund"),
-        (118701, "Nippon India Liquid Fund"),
-        (118989, "HDFC Liquid Fund"),
-        (118534, "Franklin India Liquid Fund"),
-        (119270, "UTI Liquid Cash Plan"),
-        (120255, "DSP Liquidity Fund"),
-    ],
-
-    "International / Global": [
-        (125497, "Parag Parikh Flexi Cap Fund (Global)"),
-        (118825, "ICICI Pru US Bluechip Equity Fund"),
-        (118701, "Nippon India US Equity Opportunities Fund"),
-        (119247, "SBI International Access - US Equity FoF"),
-        (120177, "Aditya Birla SL International Equity Fund"),
-        (120255, "DSP US Flexible Equity Fund"),
-        (118534, "Franklin India Feeder - Franklin U.S. Opportunities Fund"),
-        (119597, "Mirae Asset NYSE FANG+ ETF FoF"),
-    ],
-}
-
-# ================================================================
-# METRIC COMPUTATIONS
-# ================================================================
-
-def fetch_nav_history(scheme_code, scheme_name):
-    url = f"https://api.mfapi.in/mf/{scheme_code}"
+def get_all_schemes():
+    """Fetch all active scheme codes + names from AMFI"""
+    print("\n📡 Fetching complete scheme list from AMFI...")
+    url = "https://www.amfiindia.com/spages/NAVAll.txt"
     try:
-        res = requests.get(url, timeout=20)
+        res = requests.get(url, timeout=30)
         res.raise_for_status()
-        data = res.json()
-        nav_list = data.get("data", [])
-        if not nav_list:
-            return None
-        df = pd.DataFrame(nav_list, columns=["Date", "NAV"])
-        df["Date"] = pd.to_datetime(df["Date"], format="%d-%m-%Y")
-        df["NAV"] = pd.to_numeric(df["NAV"], errors="coerce")
-        df = df.dropna().sort_values("Date").reset_index(drop=True)
-        return df
-    except:
-        return None
+    except Exception as e:
+        print(f"  ❌ AMFI fetch failed: {e}")
+        return []
+
+    schemes = []
+    for line in res.text.split("\n"):
+        parts = line.strip().split(";")
+        if len(parts) < 6:
+            continue
+        code = parts[0].strip()
+        name = parts[3].strip()
+        if not code.isdigit() or not name:
+            continue
+        # Only Direct Growth plans
+        name_lower = name.lower()
+        if "direct" in name_lower and ("growth" in name_lower or "gr" in name_lower):
+            schemes.append({"code": int(code), "name": name})
+
+    print(f"  ✅ Found {len(schemes):,} Direct Growth schemes")
+    return schemes
 
 
-def cagr(nav, years):
+def categorize_schemes(schemes, max_per_cat=15):
+    """Assign each scheme to a category based on name keywords"""
+    categorized = {rule[0]: [] for rule in CATEGORY_RULES}
+
+    for s in schemes:
+        name_lower = s["name"].lower()
+        for cat_name, must_have, must_not in CATEGORY_RULES:
+            if len(categorized[cat_name]) >= max_per_cat:
+                continue
+            if any(kw in name_lower for kw in must_have):
+                if not any(kw in name_lower for kw in must_not):
+                    categorized[cat_name].append(s)
+                    break  # assign to first matching category only
+
+    for cat, funds in categorized.items():
+        print(f"  {cat}: {len(funds)} funds matched")
+
+    return categorized
+
+
+# ================================================================
+# STEP 2: FETCH NAV HISTORY PER FUND
+# ================================================================
+
+def fetch_nav(scheme_code, scheme_name):
+    """Fetch complete NAV history from mfapi.in"""
+    url = f"https://api.mfapi.in/mf/{scheme_code}"
+    for attempt in range(3):
+        try:
+            res = requests.get(url, timeout=20)
+            if res.status_code == 404:
+                return None
+            res.raise_for_status()
+            data = res.json()
+            nav_list = data.get("data", [])
+            if not nav_list:
+                return None
+            df = pd.DataFrame(nav_list, columns=["Date", "NAV"])
+            df["Date"] = pd.to_datetime(df["Date"], format="%d-%m-%Y", errors="coerce")
+            df["NAV"]  = pd.to_numeric(df["NAV"], errors="coerce")
+            df = df.dropna().sort_values("Date").reset_index(drop=True)
+            if len(df) < 30:
+                return None
+            return df
+        except Exception:
+            if attempt < 2:
+                time.sleep(1)
+    return None
+
+
+# ================================================================
+# STEP 3: COMPUTE ALL METRICS
+# ================================================================
+
+def safe_cagr(nav, years):
     try:
         days = int(years * 365)
         if len(nav) < days:
             return None
-        val = ((nav.iloc[-1] / nav.iloc[-days]) ** (1/years) - 1) * 100
-        return round(val, 2)
+        start = nav.iloc[-days]
+        end   = nav.iloc[-1]
+        if start <= 0:
+            return None
+        return round(((end / start) ** (1 / years) - 1) * 100, 2)
     except:
         return None
 
-
-def sharpe(daily_ret, rf=0.065):
+def safe_sharpe(daily_ret, rf=0.065):
     try:
-        ann_ret = daily_ret.mean() * 252
-        ann_std = daily_ret.std() * np.sqrt(252)
-        return round((ann_ret - rf) / ann_std, 3) if ann_std else None
+        ann = daily_ret.mean() * 252
+        std = daily_ret.std() * np.sqrt(252)
+        return round((ann - rf) / std, 3) if std > 0 else None
     except:
         return None
 
-
-def sortino(daily_ret, rf=0.065):
+def safe_sortino(daily_ret, rf=0.065):
     try:
-        ann_ret = daily_ret.mean() * 252
-        neg = daily_ret[daily_ret < 0]
-        down_std = neg.std() * np.sqrt(252)
-        return round((ann_ret - rf) / down_std, 3) if down_std else None
+        ann  = daily_ret.mean() * 252
+        neg  = daily_ret[daily_ret < 0]
+        down = neg.std() * np.sqrt(252)
+        return round((ann - rf) / down, 3) if down > 0 else None
     except:
         return None
 
-
-def max_drawdown(nav):
+def safe_max_dd(nav):
     try:
-        peak = nav.cummax()
-        dd = (nav - peak) / peak * 100
+        dd = (nav - nav.cummax()) / nav.cummax() * 100
         return round(dd.min(), 2)
     except:
         return None
 
-
-def volatility(daily_ret):
+def safe_vol(daily_ret):
     try:
         return round(daily_ret.std() * np.sqrt(252) * 100, 2)
     except:
         return None
 
-
-def sip_return(nav_df, years=5):
+def safe_sip(nav_df, years):
     try:
-        end = nav_df["Date"].max()
+        end   = nav_df["Date"].max()
         start = end - timedelta(days=int(years * 365))
-        df = nav_df[nav_df["Date"] >= start].copy()
+        df    = nav_df[nav_df["Date"] >= start].copy()
         if len(df) < 60:
             return None
         df["Month"] = df["Date"].dt.to_period("M")
         monthly = df.groupby("Month").first()["NAV"].values
         if len(monthly) < 3:
             return None
-        final_nav = monthly[-1]
-        units = sum(1000 / n for n in monthly)
-        total_inv = len(monthly) * 1000
-        final_val = units * final_nav
-        return round(((final_val / total_inv) ** (1/years) - 1) * 100, 2)
+        final_nav   = monthly[-1]
+        total_units = sum(1000 / n for n in monthly)
+        total_inv   = len(monthly) * 1000
+        final_val   = total_units * final_nav
+        return round(((final_val / total_inv) ** (1 / years) - 1) * 100, 2)
     except:
         return None
 
-
-def rolling_avg(nav_df, years=3):
+def safe_rolling(nav_df, years):
     try:
         window = int(years * 365)
-        navs = nav_df["NAV"].values
-        if len(navs) < window:
+        navs   = nav_df["NAV"].values
+        if len(navs) < window + 30:
             return None
-        results = []
-        for i in range(window, len(navs)):
-            r = ((navs[i] / navs[i-window]) ** (1/years) - 1) * 100
-            results.append(r)
+        results = [
+            ((navs[i] / navs[i - window]) ** (1 / years) - 1) * 100
+            for i in range(window, len(navs))
+            if navs[i - window] > 0
+        ]
         return round(np.mean(results), 2) if results else None
     except:
         return None
 
-
-def compute_metrics(scheme_code, scheme_name, category):
-    nav_df = fetch_nav_history(scheme_code, scheme_name)
-    if nav_df is None or len(nav_df) < 30:
+def compute_metrics(scheme, category):
+    code = scheme["code"]
+    name = scheme["name"]
+    nav_df = fetch_nav(code, name)
+    if nav_df is None:
         return None
 
-    nav = nav_df["NAV"]
+    nav   = nav_df["NAV"]
     daily = nav.pct_change().dropna()
 
-    inception_years = max((nav_df["Date"].max() - nav_df["Date"].min()).days / 365, 0.01)
-    since_inception = round(((nav.iloc[-1] / nav.iloc[0]) ** (1/inception_years) - 1) * 100, 2)
+    life_yrs = max((nav_df["Date"].max() - nav_df["Date"].min()).days / 365, 0.01)
+    since_inc = None
+    if nav.iloc[0] > 0:
+        since_inc = round(((nav.iloc[-1] / nav.iloc[0]) ** (1 / life_yrs) - 1) * 100, 2)
 
     return {
-        "Category":           category,
-        "Fund Name":          scheme_name,
-        "Scheme Code":        scheme_code,
-        "Latest NAV (₹)":     round(nav.iloc[-1], 2),
-        "NAV Date":           nav_df["Date"].max().strftime("%d-%b-%Y"),
-        "Launch Date":        nav_df["Date"].min().strftime("%d-%b-%Y"),
-        # Returns
-        "1Y Return (%)":      cagr(nav, 1),
-        "3Y Return (%)":      cagr(nav, 3),
-        "5Y Return (%)":      cagr(nav, 5),
-        "10Y Return (%)":     cagr(nav, 10),
-        "Since Inception (%)": since_inception,
-        # SIP Returns
-        "SIP 1Y (%)":         sip_return(nav_df, 1),
-        "SIP 3Y (%)":         sip_return(nav_df, 3),
-        "SIP 5Y (%)":         sip_return(nav_df, 5),
-        # Rolling
-        "Avg Rolling 1Y (%)": rolling_avg(nav_df, 1),
-        "Avg Rolling 3Y (%)": rolling_avg(nav_df, 3),
-        # Risk
-        "Sharpe Ratio":       sharpe(daily),
-        "Sortino Ratio":      sortino(daily),
-        "Volatility (%)":     volatility(daily),
-        "Max Drawdown (%)":   max_drawdown(nav),
-        # Score for ranking
-        "_score":             0,
+        "Category":            category,
+        "Fund Name":           name,
+        "Scheme Code":         code,
+        "Latest NAV (Rs)":     round(nav.iloc[-1], 2),
+        "NAV Date":            nav_df["Date"].max().strftime("%d-%b-%Y"),
+        "Launch Date":         nav_df["Date"].min().strftime("%d-%b-%Y"),
+        "1Y Return (%)":       safe_cagr(nav, 1),
+        "3Y Return (%)":       safe_cagr(nav, 3),
+        "5Y Return (%)":       safe_cagr(nav, 5),
+        "10Y Return (%)":      safe_cagr(nav, 10),
+        "Since Inception (%)": since_inc,
+        "SIP 1Y (%)":          safe_sip(nav_df, 1),
+        "SIP 3Y (%)":          safe_sip(nav_df, 3),
+        "SIP 5Y (%)":          safe_sip(nav_df, 5),
+        "Avg Rolling 1Y (%)":  safe_rolling(nav_df, 1),
+        "Avg Rolling 3Y (%)":  safe_rolling(nav_df, 3),
+        "Sharpe Ratio":        safe_sharpe(daily),
+        "Sortino Ratio":       safe_sortino(daily),
+        "Volatility (%)":      safe_vol(daily),
+        "Max Drawdown (%)":    safe_max_dd(nav),
+        "_score":              0.0,
     }
 
-
 def compute_score(row):
-    """Composite score for ranking — weights returns & risk-adjusted metrics"""
-    score = 0
     weights = {
         "3Y Return (%)":      0.25,
         "5Y Return (%)":      0.25,
@@ -414,316 +257,262 @@ def compute_score(row):
         "Avg Rolling 3Y (%)": 0.10,
         "SIP 5Y (%)":         0.05,
     }
+    score = 0.0
     for col, w in weights.items():
         val = row.get(col)
-        if val is not None and not np.isnan(float(val)):
-            score += float(val) * w
+        if val is not None:
+            try:
+                score += float(val) * w
+            except (TypeError, ValueError):
+                pass
     return round(score, 4)
 
 
 # ================================================================
-# EXCEL REPORT BUILDER
+# STEP 4: BUILD EXCEL REPORT
 # ================================================================
 
-# Color palette
-NAVY   = "1B3A6B"
-GOLD   = "E8A020"
-GREEN  = "27AE60"
-RED    = "E74C3C"
-AMBER  = "F39C12"
-WHITE  = "FFFFFF"
-LGRAY  = "F5F7FA"
-DGRAY  = "2C3E50"
-SILVER = "BDC3C7"
+NAVY  = "1B3A6B"
+GOLD  = "E8A020"
+GREEN = "27AE60"
+RED   = "E74C3C"
+AMBER = "F39C12"
+WHITE = "FFFFFF"
+LGRAY = "F5F7FA"
+DGRAY = "2C3E50"
+SILV  = "BDC3C7"
 
-def hdr_fill(hex_color):
-    return PatternFill("solid", fgColor=hex_color)
-
-def thin_border():
-    s = Side(style="thin", color="D0D0D0")
+def _fill(c): return PatternFill("solid", fgColor=c)
+def _border():
+    s = Side(style="thin", color="D5D5D5")
     return Border(left=s, right=s, top=s, bottom=s)
 
-def write_category_sheet(wb, category, df_cat, rank):
-    """Write one sheet per category with top 5 funds"""
-    safe_name = category[:31].replace("/", "-")
-    ws = wb.create_sheet(title=safe_name)
+COL_HEADERS = [
+    "Rank", "Fund Name", "NAV (Rs)", "NAV Date",
+    "1Y Ret%", "3Y Ret%", "5Y Ret%", "10Y Ret%", "Since Inc%",
+    "SIP 1Y%", "SIP 3Y%", "SIP 5Y%",
+    "Roll 1Y%", "Roll 3Y%",
+    "Sharpe", "Sortino", "Volatility%", "Max DD%",
+    "Launch Date", "Scheme Code", "Score"
+]
+COL_KEYS = [
+    None, "Fund Name", "Latest NAV (Rs)", "NAV Date",
+    "1Y Return (%)", "3Y Return (%)", "5Y Return (%)", "10Y Return (%)", "Since Inception (%)",
+    "SIP 1Y (%)", "SIP 3Y (%)", "SIP 5Y (%)",
+    "Avg Rolling 1Y (%)", "Avg Rolling 3Y (%)",
+    "Sharpe Ratio", "Sortino Ratio", "Volatility (%)", "Max Drawdown (%)",
+    "Launch Date", "Scheme Code", "_score"
+]
+COL_WIDTHS = [6, 45, 10, 12, 9, 9, 9, 9, 11, 9, 9, 9, 10, 10, 9, 9, 12, 10, 13, 13, 9]
+
+RET_COLS = {5, 6, 7, 8, 9, 10, 11, 12, 13, 14}  # 1-indexed column positions for returns
+
+def _ret_color(val):
+    try:
+        v = float(val)
+        return GREEN if v >= 12 else (AMBER if v >= 6 else RED)
+    except:
+        return "444444"
+
+def write_headers(ws, row, bg=NAVY, fg=WHITE):
+    for c, (h, w) in enumerate(zip(COL_HEADERS, COL_WIDTHS), 1):
+        cell = ws.cell(row=row, column=c, value=h)
+        cell.font      = Font(name="Arial", bold=True, size=9, color=fg)
+        cell.fill      = _fill(bg)
+        cell.alignment = Alignment(horizontal="center", vertical="center", wrap_text=True)
+        cell.border    = _border()
+        ws.column_dimensions[get_column_letter(c)].width = w
+    ws.row_dimensions[row].height = 28
+
+def write_fund_row(ws, row_num, rank, fund_row, bg=WHITE):
+    medals = {1: "1", 2: "2", 3: "3", 4: "4", 5: "5"}
+    vals = [medals.get(rank, str(rank))]
+    for key in COL_KEYS[1:]:
+        vals.append(fund_row.get(key))
+
+    for c, val in enumerate(vals, 1):
+        cell = ws.cell(row=row_num, column=c, value=val)
+        cell.fill   = _fill(bg)
+        cell.border = _border()
+        cell.font   = Font(name="Arial", size=9)
+        cell.alignment = Alignment(vertical="center", horizontal="left" if c == 2 else "center")
+        if c in RET_COLS:
+            cell.font = Font(name="Arial", size=9, color=_ret_color(val))
+        if c == 18:  # Max Drawdown always red
+            cell.font = Font(name="Arial", size=9, color=RED)
+    ws.row_dimensions[row_num].height = 16
+
+def build_excel(all_results, all_top5, output_path):
+    wb = Workbook()
+    ws = wb.active
+    ws.title = "Summary Dashboard"
     ws.sheet_view.showGridLines = False
 
-    top5 = df_cat.nlargest(5, "_score").reset_index(drop=True)
-
-    # ── Title row ────────────────────────────────────────────
+    # ── Summary sheet title ──────────────────────────────────
     ws.merge_cells("A1:U1")
-    ws["A1"] = f"  {category} — Top 5 Funds"
-    ws["A1"].font      = Font(name="Arial", bold=True, size=14, color=WHITE)
-    ws["A1"].fill      = hdr_fill(NAVY)
+    ws["A1"] = "  MUTUAL FUND RANKINGS — ALL CATEGORIES"
+    ws["A1"].font      = Font(name="Arial", bold=True, size=15, color=WHITE)
+    ws["A1"].fill      = _fill(NAVY)
     ws["A1"].alignment = Alignment(vertical="center")
-    ws.row_dimensions[1].height = 32
+    ws.row_dimensions[1].height = 36
 
     ws.merge_cells("A2:U2")
-    ws["A2"] = f"  As of {datetime.now().strftime('%d %b %Y')}  |  Ranked by composite score (3Y/5Y CAGR + Sharpe + Sortino + Rolling Returns)"
-    ws["A2"].font      = Font(name="Arial", size=9, color=SILVER)
-    ws["A2"].fill      = hdr_fill(DGRAY)
+    ws["A2"] = (f"  Generated: {datetime.now().strftime('%d %b %Y %H:%M IST')} "
+                f" |  Source: AMFI + mfapi.in  |  Direct Growth only  |  "
+                f"Score = 3Y(25%) + 5Y(25%) + Sharpe(20%) + Sortino(15%) + Roll3Y(10%) + SIP5Y(5%)")
+    ws["A2"].font      = Font(name="Arial", size=8, color=SILV)
+    ws["A2"].fill      = _fill(DGRAY)
     ws["A2"].alignment = Alignment(vertical="center")
-    ws.row_dimensions[2].height = 18
+    ws.row_dimensions[2].height = 16
 
-    # ── Column headers ───────────────────────────────────────
-    headers = [
-        "Rank", "Fund Name", "NAV (₹)", "NAV Date",
-        "1Y Ret%", "3Y Ret%", "5Y Ret%", "10Y Ret%", "Since Inc%",
-        "SIP 1Y%", "SIP 3Y%", "SIP 5Y%",
-        "Avg Roll 1Y%", "Avg Roll 3Y%",
-        "Sharpe", "Sortino", "Volatility%", "Max DD%",
-        "Launch Date", "Scheme Code", "Score"
-    ]
-    col_widths = [6, 42, 10, 12, 9, 9, 9, 9, 11, 9, 9, 9, 13, 13, 9, 9, 12, 10, 13, 13, 9]
+    write_headers(ws, 3, bg=GOLD)
 
-    for c, (h, w) in enumerate(zip(headers, col_widths), 1):
-        cell = ws.cell(row=3, column=c, value=h)
-        cell.font      = Font(name="Arial", bold=True, size=9, color=WHITE)
-        cell.fill      = hdr_fill(GOLD)
-        cell.alignment = Alignment(horizontal="center", vertical="center", wrap_text=True)
-        cell.border    = thin_border()
-        ws.column_dimensions[get_column_letter(c)].width = w
-    ws.row_dimensions[3].height = 30
+    sum_row = 4
+    for cat, top5 in all_top5.items():
+        # Category label
+        ws.merge_cells(f"A{sum_row}:U{sum_row}")
+        ws[f"A{sum_row}"] = f"  {cat}"
+        ws[f"A{sum_row}"].font      = Font(name="Arial", bold=True, size=10, color=WHITE)
+        ws[f"A{sum_row}"].fill      = _fill(NAVY)
+        ws[f"A{sum_row}"].alignment = Alignment(vertical="center")
+        ws.row_dimensions[sum_row].height = 20
+        sum_row += 1
 
-    # Medal colors for top 3
-    medal_fills = {
-        0: PatternFill("solid", fgColor="FFF9E6"),  # Gold tint
-        1: PatternFill("solid", fgColor="F5F5F5"),  # Silver tint
-        2: PatternFill("solid", fgColor="FFF0E8"),  # Bronze tint
-    }
-    medal_labels = {0: "🥇", 1: "🥈", 2: "🥉"}
-
-    for i, row_data in top5.iterrows():
-        r = i + 4
-        row_fill = medal_fills.get(i, PatternFill("solid", fgColor=WHITE))
-        score_val = row_data["_score"]
-
-        values = [
-            medal_labels.get(i, str(i+1)),
-            row_data["Fund Name"],
-            row_data["Latest NAV (₹)"],
-            row_data["NAV Date"],
-            row_data["1Y Return (%)"],
-            row_data["3Y Return (%)"],
-            row_data["5Y Return (%)"],
-            row_data["10Y Return (%)"],
-            row_data["Since Inception (%)"],
-            row_data["SIP 1Y (%)"],
-            row_data["SIP 3Y (%)"],
-            row_data["SIP 5Y (%)"],
-            row_data["Avg Rolling 1Y (%)"],
-            row_data["Avg Rolling 3Y (%)"],
-            row_data["Sharpe Ratio"],
-            row_data["Sortino Ratio"],
-            row_data["Volatility (%)"],
-            row_data["Max Drawdown (%)"],
-            row_data["Launch Date"],
-            row_data["Scheme Code"],
-            score_val,
-        ]
-
-        for c, val in enumerate(values, 1):
-            cell = ws.cell(row=r, column=c, value=val)
-            cell.fill   = row_fill
-            cell.border = thin_border()
-            cell.font   = Font(name="Arial", size=9)
-            cell.alignment = Alignment(vertical="center", horizontal="center")
-
-            # Fund name left-aligned
-            if c == 2:
-                cell.alignment = Alignment(vertical="center", horizontal="left", indent=1)
-                cell.font = Font(name="Arial", size=9, bold=(i == 0))
-
-            # Color-code return columns
-            if c in [5, 6, 7, 8, 9, 10, 11, 12, 13, 14]:
-                try:
-                    v = float(val)
-                    cell.font = Font(
-                        name="Arial", size=9,
-                        color=(GREEN if v >= 12 else (AMBER if v >= 6 else RED))
-                    )
-                except:
-                    pass
-
-            # Color-code max drawdown (always negative — red)
-            if c == 18:
-                cell.font = Font(name="Arial", size=9, color=RED)
-
-        ws.row_dimensions[r].height = 18
-
-    # ── Spacer + Legend ──────────────────────────────────────
-    lr = len(top5) + 5
-    ws.merge_cells(f"A{lr}:U{lr}")
-    ws.row_dimensions[lr].height = 10
-
-    lr += 1
-    ws.merge_cells(f"A{lr}:U{lr}")
-    ws[f"A{lr}"] = (
-        "  Color guide:  Green = Return ≥12%   |   Amber = Return 6–12%   |   "
-        "Red = Return <6% or Max Drawdown   |   Score = 3Y(25%) + 5Y(25%) + Sharpe(20%) + Sortino(15%) + Roll3Y(10%) + SIP5Y(5%)"
-    )
-    ws[f"A{lr}"].font      = Font(name="Arial", size=8, color="888888")
-    ws[f"A{lr}"].alignment = Alignment(vertical="center")
-    ws.row_dimensions[lr].height = 16
+        for i, fund in enumerate(top5):
+            bg = LGRAY if i % 2 == 0 else WHITE
+            write_fund_row(ws, sum_row, i + 1, fund, bg)
+            sum_row += 1
+        sum_row += 1
 
     ws.freeze_panes = "B4"
-    return top5
 
-
-def build_summary_sheet(wb, all_top5):
-    """Dashboard sheet — one row per top fund across all categories"""
-    ws = wb.active
-    ws.title = "📊 Summary Dashboard"
-    ws.sheet_view.showGridLines = False
-
-    # Title
-    ws.merge_cells("A1:V1")
-    ws["A1"] = "  MUTUAL FUND RANKINGS — ALL CATEGORIES SUMMARY"
-    ws["A1"].font      = Font(name="Arial", bold=True, size=16, color=WHITE)
-    ws["A1"].fill      = hdr_fill(NAVY)
-    ws["A1"].alignment = Alignment(vertical="center")
-    ws.row_dimensions[1].height = 38
-
-    ws.merge_cells("A2:V2")
-    ws["A2"] = f"  Generated: {datetime.now().strftime('%d %b %Y %H:%M IST')}  |  Source: AMFI via mfapi.in  |  Top 5 per SEBI category  |  Direct Growth Plans only"
-    ws["A2"].font      = Font(name="Arial", size=9, color=SILVER)
-    ws["A2"].fill      = hdr_fill(DGRAY)
-    ws["A2"].alignment = Alignment(vertical="center")
-    ws.row_dimensions[2].height = 18
-
-    headers = [
-        "Category", "Rank", "Fund Name", "NAV (₹)", "NAV Date",
-        "1Y Ret%", "3Y Ret%", "5Y Ret%", "10Y Ret%", "Since Inc%",
-        "SIP 1Y%", "SIP 3Y%", "SIP 5Y%",
-        "Avg Roll 1Y%", "Avg Roll 3Y%",
-        "Sharpe", "Sortino", "Volatility%", "Max DD%",
-        "Launch Date", "Scheme Code", "Score"
-    ]
-    col_widths = [20, 6, 40, 10, 12, 9, 9, 9, 9, 11, 9, 9, 9, 13, 13, 9, 9, 12, 10, 13, 13, 9]
-
-    for c, (h, w) in enumerate(zip(headers, col_widths), 1):
-        cell = ws.cell(row=3, column=c, value=h)
-        cell.font      = Font(name="Arial", bold=True, size=9, color=WHITE)
-        cell.fill      = hdr_fill(NAVY)
-        cell.alignment = Alignment(horizontal="center", vertical="center", wrap_text=True)
-        cell.border    = thin_border()
-        ws.column_dimensions[get_column_letter(c)].width = w
-    ws.row_dimensions[3].height = 30
-
-    row = 4
+    # ── One sheet per category ───────────────────────────────
     for cat, top5 in all_top5.items():
-        # Category label row
-        ws.merge_cells(f"A{row}:V{row}")
-        ws[f"A{row}"] = f"  {cat}"
-        ws[f"A{row}"].font      = Font(name="Arial", bold=True, size=10, color=WHITE)
-        ws[f"A{row}"].fill      = hdr_fill(GOLD)
-        ws[f"A{row}"].alignment = Alignment(vertical="center")
-        ws.row_dimensions[row].height = 20
-        row += 1
+        safe = cat[:31].replace("/", "-").replace("—", "-")
+        cs = wb.create_sheet(title=safe)
+        cs.sheet_view.showGridLines = False
 
-        for i, (_, fund_row) in enumerate(top5.iterrows()):
-            bg = LGRAY if i % 2 == 0 else WHITE
-            vals = [
-                cat, f"#{i+1}", fund_row["Fund Name"], fund_row["Latest NAV (₹)"], fund_row["NAV Date"],
-                fund_row["1Y Return (%)"], fund_row["3Y Return (%)"], fund_row["5Y Return (%)"],
-                fund_row["10Y Return (%)"], fund_row["Since Inception (%)"],
-                fund_row["SIP 1Y (%)"], fund_row["SIP 3Y (%)"], fund_row["SIP 5Y (%)"],
-                fund_row["Avg Rolling 1Y (%)"], fund_row["Avg Rolling 3Y (%)"],
-                fund_row["Sharpe Ratio"], fund_row["Sortino Ratio"],
-                fund_row["Volatility (%)"], fund_row["Max Drawdown (%)"],
-                fund_row["Launch Date"], fund_row["Scheme Code"], fund_row["_score"]
-            ]
-            for c, val in enumerate(vals, 1):
-                cell = ws.cell(row=row, column=c, value=val)
-                cell.fill   = PatternFill("solid", fgColor=bg)
-                cell.border = thin_border()
-                cell.font   = Font(name="Arial", size=9)
-                cell.alignment = Alignment(vertical="center", horizontal="center")
-                if c == 3:
-                    cell.alignment = Alignment(vertical="center", horizontal="left", indent=1)
-                if c in [6, 7, 8, 9, 10, 11, 12, 13, 14, 15]:
-                    try:
-                        v = float(val)
-                        cell.font = Font(name="Arial", size=9,
-                                         color=(GREEN if v >= 12 else (AMBER if v >= 6 else RED)))
-                    except:
-                        pass
-                if c == 19:
-                    cell.font = Font(name="Arial", size=9, color=RED)
-            ws.row_dimensions[row].height = 16
-            row += 1
+        cs.merge_cells("A1:U1")
+        cs["A1"] = f"  {cat} — Top {len(top5)} Funds"
+        cs["A1"].font      = Font(name="Arial", bold=True, size=13, color=WHITE)
+        cs["A1"].fill      = _fill(NAVY)
+        cs["A1"].alignment = Alignment(vertical="center")
+        cs.row_dimensions[1].height = 30
 
-        row += 1  # gap between categories
+        cs.merge_cells("A2:U2")
+        cs["A2"] = f"  {datetime.now().strftime('%d %b %Y')}  |  All metrics computed from historical NAV  |  Direct Growth plans"
+        cs["A2"].font      = Font(name="Arial", size=8, color=SILV)
+        cs["A2"].fill      = _fill(DGRAY)
+        cs["A2"].alignment = Alignment(vertical="center")
+        cs.row_dimensions[2].height = 14
 
-    ws.freeze_panes = "C4"
-    ws.auto_filter.ref = f"A3:V{row}"
+        write_headers(cs, 3, bg=GOLD)
+
+        # All funds in category (ranked)
+        cat_all = [r for r in all_results if r.get("Category") == cat]
+        cat_all.sort(key=lambda x: x.get("_score", 0), reverse=True)
+
+        medal_fills = ["FFF9E6", "F5F5F5", "FFF0E8", WHITE, WHITE]
+        for i, fund in enumerate(cat_all):
+            bg = medal_fills[i] if i < 5 else (LGRAY if i % 2 == 0 else WHITE)
+            write_fund_row(cs, i + 4, i + 1, fund, bg)
+
+        cs.freeze_panes = "B4"
+
+    wb.save(output_path)
+    print(f"  📊 Saved: {output_path}")
 
 
 # ================================================================
-# MAIN RUNNER
+# MAIN
 # ================================================================
 
 def main():
+    # 1. Get all real scheme codes from AMFI
+    schemes = get_all_schemes()
+    if not schemes:
+        print("❌ Could not fetch schemes. Exiting.")
+        return
+
+    # 2. Categorize
+    print("\n📂 Categorizing funds by name keywords...")
+    categorized = categorize_schemes(schemes, max_per_cat=15)
+
+    # 3. Fetch history & compute metrics
     all_results = []
     all_top5    = {}
-    total_funds = sum(len(v) for v in ALL_FUNDS.values())
+    total = sum(len(v) for v in categorized.values())
+    done  = 0
 
-    print(f"\n📡 Fetching data for {total_funds} funds across {len(ALL_FUNDS)} categories...\n")
+    print(f"\n📡 Fetching NAV history for {total} funds across {len(categorized)} categories...\n")
 
-    for category, funds in ALL_FUNDS.items():
-        print(f"\n{'─'*50}")
-        print(f"  📂 {category} ({len(funds)} funds)")
-        print(f"{'─'*50}")
+    for category, fund_list in categorized.items():
+        if not fund_list:
+            continue
+
+        print(f"\n{'─'*55}")
+        print(f"  📂 {category}  ({len(fund_list)} funds)")
+        print(f"{'─'*55}")
 
         cat_results = []
-        for code, name in funds:
-            metrics = compute_metrics(code, name, category)
+        for scheme in fund_list:
+            metrics = compute_metrics(scheme, category)
+            done += 1
             if metrics:
                 metrics["_score"] = compute_score(metrics)
                 cat_results.append(metrics)
-            time.sleep(0.25)
+                print(f"  [{done}/{total}] ✅ {scheme['name'][:55]}")
+            else:
+                print(f"  [{done}/{total}] ⚠️  {scheme['name'][:55]} — skipped")
+            time.sleep(0.3)
 
         if cat_results:
             all_results.extend(cat_results)
-            df_cat = pd.DataFrame(cat_results)
-            all_top5[category] = df_cat.nlargest(5, "_score").reset_index(drop=True)
+            ranked = sorted(cat_results, key=lambda x: x["_score"], reverse=True)
+            top5   = ranked[:5]
+            all_top5[category] = top5
 
             print(f"\n  🏆 TOP 5 — {category}")
-            for i, row in all_top5[category].iterrows():
-                ret3 = row["3Y Return (%)"]
-                ret5 = row["5Y Return (%)"]
-                sharpe_val = row["Sharpe Ratio"]
-                print(f"     #{i+1} {row['Fund Name'][:45]}")
-                print(f"         3Y: {ret3}%  |  5Y: {ret5}%  |  Sharpe: {sharpe_val}")
+            for i, f in enumerate(top5):
+                print(f"     #{i+1} {f['Fund Name'][:50]}")
+                print(f"         3Y: {f['3Y Return (%)']}%  |  5Y: {f['5Y Return (%)']}%  |  Sharpe: {f['Sharpe Ratio']}")
 
-    # ── Save all results to CSV ──────────────────────────────
+    # 4. Save outputs
     os.makedirs("output", exist_ok=True)
 
-    df_all = pd.DataFrame(all_results)
-    df_all = df_all.drop(columns=["_score"])
-    df_all.to_csv("output/all_funds_metrics.csv", index=False)
-    print(f"\n\n📁 Saved: output/all_funds_metrics.csv ({len(df_all)} funds)")
+    # ── CSV: all funds ───────────────────────────────────────
+    if all_results:
+        df_all = pd.DataFrame(all_results)
+        # Safe drop — errors='ignore' prevents KeyError if column missing
+        df_all = df_all.drop(columns=["_score"], errors="ignore")
+        df_all.to_csv("output/all_funds_metrics.csv", index=False)
+        print(f"\n📁 Saved CSV: output/all_funds_metrics.csv  ({len(df_all)} funds)")
+    else:
+        print("\n⚠️  No fund data collected. Check API connectivity.")
+        return
 
-    # ── Build Excel report ───────────────────────────────────
+    # ── CSV: top 5 per category ──────────────────────────────
+    top5_rows = []
+    for cat, top5 in all_top5.items():
+        for i, f in enumerate(top5):
+            row = f.copy()
+            row["Rank"] = i + 1
+            top5_rows.append(row)
+    if top5_rows:
+        df_top5 = pd.DataFrame(top5_rows)
+        df_top5 = df_top5.drop(columns=["_score"], errors="ignore")
+        df_top5.to_csv("output/top5_per_category.csv", index=False)
+        print(f"📁 Saved CSV: output/top5_per_category.csv  ({len(top5_rows)} entries)")
+
+    # ── Excel report ─────────────────────────────────────────
     print("\n📊 Building Excel report...")
-    wb = Workbook()
-
-    build_summary_sheet(wb, all_top5)
-
-    for rank, (category, top5) in enumerate(all_top5.items(), 1):
-        write_category_sheet(wb, category, pd.DataFrame(
-            [m for m in all_results if m["Category"] == category]
-        ), rank)
-
-    output_path = "output/MF_Top5_Rankings.xlsx"
-    wb.save(output_path)
-    print(f"📁 Saved: {output_path}")
+    build_excel(all_results, all_top5, "output/MF_Top5_Rankings.xlsx")
 
     print("\n" + "=" * 65)
-    print(f"  ✅ DONE! Processed {len(df_all)} funds across {len(all_top5)} categories")
-    print(f"  📊 Excel: output/MF_Top5_Rankings.xlsx")
-    print(f"  📋 CSV:   output/all_funds_metrics.csv")
+    print(f"  ✅ DONE!  {len(all_results)} funds  |  {len(all_top5)} categories")
+    print(f"  📊 Excel:  output/MF_Top5_Rankings.xlsx")
+    print(f"  📋 CSV:    output/all_funds_metrics.csv")
+    print(f"  📋 Top5:   output/top5_per_category.csv")
     print("=" * 65)
 
 
