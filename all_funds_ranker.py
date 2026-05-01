@@ -79,15 +79,68 @@ def download_db():
     os.remove(ZST_FILE)
     return True
 
+def get_schema(conn):
+    """Print and return actual column names for all tables"""
+    cursor = conn.cursor()
+    schema = {}
+    cursor.execute("SELECT name FROM sqlite_master WHERE type='table'")
+    tables = [row[0] for row in cursor.fetchall()]
+    print("\n  Database schema:")
+    for table in tables:
+        cursor.execute(f"PRAGMA table_info({table})")
+        cols = [row[1] for row in cursor.fetchall()]
+        schema[table] = cols
+        print(f"    {table}: {cols}")
+    return schema
+
+def find_name_column(schema, table):
+    """Find which column holds the fund name"""
+    cols = schema.get(table, [])
+    # Try common name column variants
+    for candidate in ["name", "scheme_name", "fund_name", "schemeName", "scheme_name_amfi"]:
+        if candidate in cols:
+            return candidate
+    # Fallback: return any column with 'name' in it
+    for col in cols:
+        if "name" in col.lower():
+            return col
+    return None
+
 def get_relevant_schemes(conn):
     print("\nFinding relevant Direct Growth funds...")
-    # schemes table has: scheme_code, name
-    # securities table has: isin, type, scheme_code (no name column)
-    df = pd.read_sql_query("SELECT scheme_code, name FROM schemes WHERE name IS NOT NULL", conn)
-    print(f"  Total securities: {len(df):,}")
+
+    # Step 1: inspect actual schema
+    schema = get_schema(conn)
+
+    # Step 2: find which table + column has fund names
+    name_col   = None
+    name_table = None
+    for table in ["schemes", "securities", "scheme_details", "funds"]:
+        col = find_name_column(schema, table)
+        if col:
+            name_col   = col
+            name_table = table
+            print(f"  Using: {table}.{col} for fund names")
+            break
+
+    if not name_col:
+        # Last resort: check nav table columns
+        print("  WARNING: Could not find name column. Printing all columns:")
+        for t, cols in schema.items():
+            print(f"    {t}: {cols}")
+        raise ValueError("Cannot find fund name column in database. Check schema printout above.")
+
+    # Step 3: query fund names
+    df = pd.read_sql_query(
+        f"SELECT scheme_code, {name_col} as fund_name FROM {name_table} WHERE {name_col} IS NOT NULL",
+        conn
+    )
+    print(f"  Total funds in DB: {len(df):,}")
+
+    # Step 4: categorize
     categorized = {cat[0]: [] for cat in CATEGORIES}
     for _, row in df.iterrows():
-        name_l = str(row["name"]).lower()
+        name_l = str(row["fund_name"]).lower()
         if "direct" not in name_l:
             continue
         if "growth" not in name_l and not name_l.endswith(" gr"):
@@ -99,8 +152,12 @@ def get_relevant_schemes(conn):
                 continue
             if any(kw in name_l for kw in must_have):
                 if not any(kw in name_l for kw in must_not):
-                    categorized[cat_name].append({"code": int(row["scheme_code"]), "name": str(row["name"])})
+                    categorized[cat_name].append({
+                        "code": int(row["scheme_code"]),
+                        "name": str(row["fund_name"])
+                    })
                     break
+
     total = sum(len(v) for v in categorized.values())
     for cat, funds in categorized.items():
         if funds:
