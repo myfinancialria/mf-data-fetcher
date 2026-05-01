@@ -1,84 +1,89 @@
-Category,Fund Name,Scheme Code,Latest NAV (Rs),NAV Date,History Days,30D Return (%),1Y Return (%),3Y Return (%),5Y Return (%),Sharpe Ratio,Sortino Ratio,Volatility (%),Max Drawdown (%),SIP 1Y (%),SIP 3Y (%),Rank
-Large Cap,HDFC Large Cap Fund - Growth Option - Direct Plan,119018,1186.28,01-May-2026,1,,,,,,,,0.0,,,1
-Large Cap,Franklin India Large Cap Fund- Direct - Growth,118531,1094.28,01-May-2026,1,,,,,,,,0.0,,,2
-Large Cap,Kotak Large Cap  Fund - Growth - Direct,120152,642.3,01-May-2026,1,,,,,,,,0.0,,,3
-Large Cap,Aditya Birla Sun Life Large Cap Fund - Growth - Direct Plan,119528,561.31,01-May-2026,1,,,,,,,,0.0,,,4
-Large Cap,HSBC Large Cap Fund - Direct Growth,120030,515.08,01-May-2026,1,,,,,,,,0.0,,,5
-Mid Cap,Franklin India Mid Cap Fund - Direct - Growth,118533,3005.1,01-May-2026,1,,,,,,,,0.0,,,1
-Mid Cap,Aditya Birla Sun Life Midcap Fund - Growth - Direct Plan,119620,890.14,01-May-2026,1,,,,,,,,0.0,,,2
-Mid Cap,HSBC Midcap Fund - Direct Growth,151036,484.62,01-May-2026,1,,,,,,,,0.0,,,3
-Mid Cap,ICICI Prudential MidCap Fund - Direct Plan -  Growth,120381,371.42,01-May-2026,1,,,,,,,,0.0,,,4
-Mid Cap,HDFC Mid Cap Fund - Growth Option - Direct Plan,118989,217.72,01-May-2026,1,,,,,,,,0.0,,,5
-Small Cap,Kotak-Small Cap Fund - Growth - Direct,120164,294.73,01-May-2026,1,,,,,,,,0.0,,,1
-Small Cap,DSP Small Cap Fund - Direct Plan - Growth,119212,224.0,01-May-2026,1,,,,,,,,0.0,,,2
-Small Cap,Franklin India Small Cap Fund - Direct - Growth,118525,194.18,01-May-2026,1,,,,,,,,0.0,,,3
-Small Cap,HDFC Small Cap Fund - Growth Option - Direct Plan,130503,150.67,01-May-2026,1,,,,,,,,0.0,,,4
-Small Cap,Axis Small Cap Fund - Direct Plan - Growth,125354,122.8,01-May-2026,1,,,,,,,,0.0,,,5
-Flexi Cap,HDFC Flexi Cap Fund - Growth Option - Direct Plan,118955,2137.0,01-May-2026,1,,,,,,,,0.0,,,1
-Flexi Cap,Aditya Birla Sun Life Flexi Cap Fund - Growth - Direct Plan,120564,2051.1,01-May-2026,1,,,,,,,,0.0,,,2
-Flexi Cap,Franklin India Flexi Cap Fund - Direct - Growth,118535,1749.46,01-May-2026,1,,,,,,,,0.0,,,3
-Flexi Cap,CANARA ROBECO FLEXICAP FUND - DIRECT PLAN - GROWTH OPTION,118275,372.95,01-May-2026,1,,,,,,,,0.0,,,4
-Flexi Cap,HSBC Flexi Cap Fund - Direct Growth,120046,246.06,01-May-2026,1,,,,,,,,0.0,,,5
-Multi Cap,ICICI Prudential Multicap Fund - Direct Plan -  Growth,120599,916.28,01-May-2026,1,,,,,,,,0.0,,,1
-Multi Cap,Baroda BNP Paribas MULTI CAP FUND - Direct Plan - Growth Option,119354,318.94,01-May-2026,1,,,,,,,,0.0,,,2
-Multi Cap,Sundaram Focused Fund (Formerly Known as Principal Focused Multicap Fund)- Direct Plan - Growth Option,149533,171.0,01-May-2026,1,,,,,,,,0.0,,,3
-Multi Cap,Invesco India Multicap Fund - Direct Plan - Growth Option,120413,144.36,01-May-2026,1,,,,,,,,0.0,,,4
-Multi Cap,Mahindra Manulife Multi Cap Fund - Direct Plan -Growth,141226,42.28,01-May-2026,1,,,,,,,,0.0,,,5
-Large & Mid Cap,ICICI Prudential Large & Mid Cap Fund - Direct Plan - Growth,120596,1126.58,01-May-2026,1,,,,,,,,0.0,,,1
-Large & Mid Cap,Aditya Birla Sun Life Large & Mid Cap Fund - Growth - Direct Plan,119436,1004.78,01-May-2026,1,,,,,,,,0.0,,,2
-Large & Mid Cap,DSP Large & Mid Cap Fund - Direct Plan - Growth,119218,680.78,01-May-2026,1,,,,,,,,0.0,,,3
-Large & Mid Cap,Kotak Large & Midcap Fund - Direct- Growth,120158,395.08,01-May-2026,1,,,,,,,,0.0,,,4
-Large & Mid Cap,HDFC Large and Mid Cap Fund - Growth Option - Direct Plan,130498,350.51,01-May-2026,1,,,,,,,,0.0,,,5
-ELSS / Tax Saving,Franklin India ELSS Tax Saver Fund - Direct - Growth,118540,1560.42,01-May-2026,1,,,,,,,,0.0,,,1
-ELSS / Tax Saving,HDFC ELSS Tax saver - Growth Option - Direct Plan,119060,1448.24,01-May-2026,1,,,,,,,,0.0,,,2
-ELSS / Tax Saving,ICICI Prudential ELSS Tax Saver Fund - Direct Plan - Growth,120592,1017.7,01-May-2026,1,,,,,,,,0.0,,,3
-ELSS / Tax Saving,CANARA ROBECO ELSS TAX SAVER - DIRECT PLAN - GROWTH OPTION,118285,194.97,01-May-2026,1,,,,,,,,0.0,,,4
-ELSS / Tax Saving,BANK OF INDIA ELSS Tax Saver -Direct Plan- Growth,119351,191.44,01-May-2026,1,,,,,,,,0.0,,,5
-Aggressive Hybrid,Aditya Birla Sun Life Equity Hybrid'95 Fund - Direct Plan-Growth,120517,1675.49,01-May-2026,1,,,,,,,,0.0,,,1
-Aggressive Hybrid,ICICI Prudential Equity & Debt Fund - Direct Plan - Growth,120251,445.69,01-May-2026,1,,,,,,,,0.0,,,2
-Aggressive Hybrid,CANARA ROBECO EQUITY HYBRID FUND - DIRECT PLAN - GROWTH OPTION,118272,408.49,01-May-2026,1,,,,,,,,0.0,,,3
-Aggressive Hybrid,DSP Aggressive Hybrid Fund - Direct Plan - Growth,119019,389.09,01-May-2026,1,,,,,,,,0.0,,,4
-Aggressive Hybrid,Franklin India Aggressive Hybrid Fund - Direct - Growth,118546,302.01,01-May-2026,1,,,,,,,,0.0,,,5
-Balanced Advantage,HDFC Balanced Advantage Fund - Growth Plan - Direct Plan,118968,558.92,01-May-2026,1,,,,,,,,0.0,,,1
-Balanced Advantage,Aditya Birla Sun Life Balanced Advantage Fund - Direct Plan - Growth Option,131670,124.25,01-May-2026,1,,,,,,,,0.0,,,2
-Balanced Advantage,ICICI Prudential Balanced Advantage Fund - Direct Plan -  Growth,120377,84.81,01-May-2026,1,,,,,,,,0.0,,,3
-Balanced Advantage,Invesco India Balanced Advantage Fund - Direct Plan - Growth,120333,61.51,01-May-2026,1,,,,,,,,0.0,,,4
-Balanced Advantage,Edelweiss Balanced Advantage Fund -Direct Plan-Growth Option,118615,59.05,01-May-2026,1,,,,,,,,0.0,,,5
-Index — Nifty 50,Aditya Birla Sun Life Nifty 50 Index Fund - Growth - Direct Plan,119648,248.99,01-May-2026,1,,,,,,,,0.0,,,1
-Index — Nifty 50,Franklin India INDEX FUND- NSE NIFTY 50 INDEX FUND- Direct - Growth,118581,203.99,01-May-2026,1,,,,,,,,0.0,,,2
-Index — Nifty 50,LIC MF Nifty 50 Index Fund-Direct Plan-Growth,120307,143.01,01-May-2026,1,,,,,,,,0.0,,,3
-Index — Nifty 50,BANDHAN Nifty 50 Index Fund-Direct Plan-Growth,118482,53.38,01-May-2026,1,,,,,,,,0.0,,,4
-Index — Nifty 50,HSBC NIFTY 50 INDEX FUND - Direct Growth,151157,28.23,01-May-2026,1,,,,,,,,0.0,,,5
-Index — Nifty 100,Axis Nifty 100 Index Fund - Direct Plan - Growth Option,147666,22.2,01-May-2026,1,,,,,,,,0.0,,,1
-Index — Nifty 100,BANDHAN NIFTY 100 INDEX FUND - DIRECT PLAN - GROWTH,149832,14.87,01-May-2026,1,,,,,,,,0.0,,,2
-Index — Nifty 100,HDFC NIFTY 100 Index Fund - Direct Plan - Growth Option,149868,14.79,01-May-2026,1,,,,,,,,0.0,,,3
-Sectoral — IT,Franklin India Technology Fund - Direct - Growth,118537,496.59,01-May-2026,1,,,,,,,,0.0,,,1
-Sectoral — IT,ICICI Prudential Technology Fund - Direct Plan -  Growth,120594,189.97,01-May-2026,1,,,,,,,,0.0,,,2
-Sectoral — IT,Aditya Birla Sun Life Digital India Fund - Growth - Direct Plan,120539,162.92,01-May-2026,1,,,,,,,,0.0,,,3
-Sectoral — IT,Tata Digital India Fund-Direct Plan-Growth,135800,45.98,01-May-2026,1,,,,,,,,0.0,,,4
-Sectoral — IT,SBI Retirement Benefit Fund - Aggressive Plan - Direct Plan - Growth,148683,20.66,01-May-2026,1,,,,,,,,0.0,,,5
-Sectoral — Banking,Nippon India Banking & Financial Services Fund - Direct Plan Growth Plan - Bonus Option,118588,684.64,01-May-2026,1,,,,,,,,0.0,,,1
-Sectoral — Banking,Nippon India Banking & Financial Services Fund - Direct Plan Growth Plan - Growth Option,118589,684.64,01-May-2026,1,,,,,,,,0.0,,,2
-Sectoral — Banking,UTI Banking and Financial Services Fund - Direct Plan - Growth Option,120733,214.96,01-May-2026,1,,,,,,,,0.0,,,3
-Sectoral — Banking,ICICI Prudential Banking and Financial Services Fund - Direct Plan -  Growth,120244,144.31,01-May-2026,1,,,,,,,,0.0,,,4
-Sectoral — Banking,Aditya Birla Sun Life Banking and Financial Services Fund - Direct Plan - Growth,125597,68.98,01-May-2026,1,,,,,,,,0.0,,,5
-Debt — Liquid,HDFC Liquid Fund - Growth Option - Direct Plan,119091,5446.16,01-May-2026,1,,,,,,,,0.0,,,1
-Debt — Liquid,Franklin India Liquid Fund - Super Institutional - Direct - Growth,118577,4167.93,01-May-2026,1,,,,,,,,0.0,,,2
-Debt — Liquid,Invesco India Liquid Fund - Direct Plan - Growth,120537,3805.97,01-May-2026,1,,,,,,,,0.0,,,3
-Debt — Liquid,Edelweiss Liquid Fund - Direct Plan - Growth Option,140196,3585.54,01-May-2026,1,,,,,,,,0.0,,,4
-Debt — Liquid,BANDHAN LIQUID Fund -Direct Plan-Growth,118364,3349.04,01-May-2026,1,,,,,,,,0.0,,,5
-Debt — Short Dur,Invesco India Short Duration Fund - Direct Plan - Growth,120560,4099.16,01-May-2026,1,,,,,,,,0.0,,,1
-Debt — Short Dur,Groww Short Term Fund (formerly known as Indiabulls Short Term Fund) - Direct Plan - Growth Option,123704,2491.12,01-May-2026,1,,,,,,,,0.0,,,2
-Debt — Short Dur,TRUSTMF Short Duration Fund-Direct Plan-Growth,149076,1328.66,01-May-2026,1,,,,,,,,0.0,,,3
-Debt — Short Dur,JioBlackRock Short Duration Fund - Direct Plan - Growth Option,154079,1013.42,01-May-2026,1,,,,,,,,0.0,,,4
-Debt — Short Dur,ICICI Prudential Short Term Fund - Direct Plan - Growth Option,120754,68.89,01-May-2026,1,,,,,,,,0.0,,,5
-Debt — Corp Bond,Kotak Corporate Bond Fund- Direct Plan- Growth Option,133791,4099.87,01-May-2026,1,,,,,,,,0.0,,,1
-Debt — Corp Bond,Invesco India Corporate Bond Fund - Direct Plan - Growth,120497,3528.35,01-May-2026,1,,,,,,,,0.0,,,2
-Debt — Corp Bond,TRUSTMF CORPORATE BOND FUND-DIRECT PLAN-GROWTH,151320,1246.14,01-May-2026,1,,,,,,,,0.0,,,3
-Debt — Corp Bond,Aditya Birla Sun Life Corporate Bond Fund - Growth - Direct Plan,119533,118.67,01-May-2026,1,,,,,,,,0.0,,,4
-Debt — Corp Bond,HSBC Corporate Bond Fund - Direct Growth,150996,81.11,01-May-2026,1,,,,,,,,0.0,,,5
-International,ICICI Prudential US Bluechip Equity Fund - Direct Plan -  Growth,120186,82.75,01-May-2026,1,,,,,,,,0.0,,,1
-International,Motilal Oswal Nasdaq 100 Fund of Fund- Direct Plan Growth,145552,63.16,01-May-2026,1,,,,,,,,0.0,,,2
-International,DSP World Gold Mining Overseas Equity Omni FoF - Direct Plan - Growth,119277,62.09,01-May-2026,1,,,,,,,,0.0,,,3
-International,Nippon India US Equity Opportunities Fund- Direct Plan- Growth Plan- Growth Option,134923,44.28,01-May-2026,1,,,,,,,,0.0,,,4
-International,Kotak Global Emerging Market overseas Equity Omni FOF - Growth - Direct,119779,40.95,01-May-2026,1,,,,,,,,0.0,,,5
+Category,Fund Name,Scheme Code,Latest NAV (Rs),NAV Date,Launch Date,History Days,1Y Return (%),3Y Return (%),5Y Return (%),10Y Return (%),Since Inception (%),SIP 1Y (%),SIP 3Y (%),SIP 5Y (%),Avg Rolling 1Y (%),Avg Rolling 3Y (%),Sharpe Ratio,Sortino Ratio,Volatility (%),Max Drawdown (%),Rank
+Large Cap,ICICI Prudential Large Cap Fund (erstwhile Bluechip Fund) - Direct Plan - Growth,120586,117.64,30-Apr-2026,02-Jan-2013,3279,0.57,18.63,22.58,,14.81,-0.42,8.91,12.08,27.11,24.08,0.577,0.721,15.34,-37.3,1
+Large Cap,BNP Paribas LARGE CAP Fund - Direct Plan - Growth Option,119893,146.76,13-Mar-2022,02-Jan-2013,2264,46.55,20.16,20.06,,15.19,11.1,12.45,11.03,27.5,20.83,0.587,0.733,15.71,-32.34,2
+Large Cap,Edelweiss Large Cap Fund - Direct Plan-Growth option,118617,94.31,30-Apr-2026,08-Jan-2013,3277,-1.43,16.54,22.53,,14.06,-0.03,8.08,11.1,25.58,23.08,0.536,0.653,15.2,-35.15,3
+Large Cap,CANARA ROBECO LARGE CAP FUND - DIRECT PLAN - GROWTH OPTION,118269,70.05,30-Apr-2026,02-Jan-2013,3278,-0.67,15.17,23.23,,14.07,-1.15,7.65,10.92,25.91,24.28,0.534,0.665,15.34,-32.56,4
+Large Cap,Kotak Large Cap  Fund - Growth - Direct,120152,642.3,30-Apr-2026,02-Jan-2013,3279,0.72,15.73,22.52,,14.02,0.16,8.02,11.14,25.93,23.09,0.52,0.642,15.78,-36.94,5
+Mid Cap,Edelweiss Mid Cap Fund - Direct Plan - Growth Option,140228,121.41,30-Apr-2026,28-Nov-2016,2325,5.76,28.96,35.93,,20.43,6.47,16.05,19.9,35.68,37.62,0.809,0.949,17.33,-39.21,1
+Mid Cap,Mahindra Manulife Mid Cap Fund - Direct Plan -Growth,142110,39.66,30-Apr-2026,06-Feb-2018,2027,4.22,29.33,33.72,,19.19,8.43,15.52,18.98,38.64,39.61,0.76,0.877,17.03,-33.1,2
+Mid Cap,Invesco India Midcap Fund - Direct Plan - Growth Option,120403,217.06,30-Apr-2026,02-Jan-2013,3279,9.79,29.55,33.32,,20.68,6.65,16.67,19.08,39.83,32.03,0.873,1.039,16.14,-34.09,3
+Mid Cap,Nippon India Growth Mid Cap Fund - Direct Plan Growth Plan - Growth Option,118668,4747.21,30-Apr-2026,02-Jan-2013,3279,6.18,29.5,34.01,,18.27,7.93,15.81,19.39,35.86,30.33,0.719,0.869,16.89,-35.32,4
+Mid Cap,HDFC Mid Cap Fund - Growth Option - Direct Plan,118989,217.72,30-Apr-2026,01-Jan-2013,3280,5.1,30.97,31.72,,20.16,4.82,14.96,18.53,38.94,31.23,0.864,1.021,15.71,-39.51,5
+Small Cap,Invesco India Smallcap Fund - Direct Plan - Growth,145137,46.86,30-Apr-2026,02-Nov-2018,1844,1.96,28.86,35.63,,22.74,5.35,15.12,19.97,48.02,46.81,0.884,0.996,18.32,-37.66,1
+Small Cap,quant Small Cap Fund - Growth Option - Direct Plan,120828,280.48,30-Apr-2026,07-Jan-2013,3279,-5.27,27.83,40.22,,17.14,4.69,12.93,24.0,38.33,33.58,0.576,0.607,20.37,-51.6,2
+Small Cap,Nippon India Small Cap Fund - Direct Plan Growth Plan - Growth Option,118778,192.08,30-Apr-2026,02-Jan-2013,3279,-3.93,29.14,35.65,,23.92,5.15,13.23,20.49,50.03,39.81,0.978,1.141,17.4,-48.58,3
+Small Cap,Axis Small Cap Fund - Direct Plan - Growth,125354,122.8,30-Apr-2026,05-Dec-2013,3057,5.52,22.86,34.4,,22.39,4.4,10.88,17.07,35.14,33.4,1.033,1.192,14.79,-34.64,4
+Small Cap,Tata Small Cap Fund-Direct Plan-Growth,145206,39.54,30-Apr-2026,13-Nov-2018,1839,-19.56,20.25,31.44,,20.19,-6.71,7.6,15.89,47.67,47.79,0.817,0.921,16.86,-36.61,5
+Flexi Cap,HDFC Flexi Cap Fund - Growth Option - Direct Plan,118955,2137.0,30-Apr-2026,01-Jan-2013,3280,3.06,27.11,26.79,,15.95,0.8,12.17,15.59,30.99,26.16,0.59,0.738,17.23,-41.84,1
+Flexi Cap,JM Flexicap Fund (Direct) - Growth Option,120492,106.86,30-Apr-2026,02-Jan-2013,3279,-10.49,23.81,27.62,,16.55,-1.97,10.73,14.53,33.23,28.48,0.617,0.762,17.36,-34.95,2
+Flexi Cap,Parag Parikh Flexi Cap Fund - Direct Plan - Growth,122639,91.4,29-Apr-2026,28-May-2013,3179,5.82,18.78,30.44,,18.67,1.84,10.96,15.13,32.06,29.96,0.982,1.229,11.99,-31.2,3
+Flexi Cap,Edelweiss Flexi Cap Fund - Direct Plan - Growth Option,140353,44.25,30-Apr-2026,28-Nov-2016,2325,0.5,20.78,25.93,,16.9,2.61,10.98,13.81,27.67,28.75,0.672,0.783,16.0,-36.1,4
+Flexi Cap,IDBI FLEXI CAP FUND Growth Direct,128236,42.88,28-Jul-2023,04-Apr-2014,2291,11.26,27.62,22.38,,16.93,11.58,14.68,12.11,21.85,17.65,0.724,0.852,14.68,-34.04,5
+Multi Cap,Mahindra Manulife Multi Cap Fund - Direct Plan -Growth,141226,42.28,30-Apr-2026,18-May-2017,2207,4.35,23.26,31.95,,17.45,6.52,12.58,16.77,32.93,35.62,0.666,0.76,17.2,-34.44,1
+Multi Cap,Nippon India Multi Cap Fund - Direct Plan Growth Plan - Growth Option,118650,326.58,30-Apr-2026,02-Jan-2013,3279,1.31,27.87,27.2,,16.03,3.55,12.93,16.76,31.92,26.09,0.603,0.728,16.88,-42.75,2
+Multi Cap,quant Multi Cap Fund-GROWTH OPTION-Direct Plan,120823,679.05,30-Apr-2026,07-Jan-2013,3283,-6.65,16.46,31.06,,18.12,2.81,7.0,14.82,37.32,33.67,0.698,0.843,17.24,-36.26,3
+Multi Cap,ICICI Prudential Multicap Fund - Direct Plan -  Growth,120599,916.28,30-Apr-2026,02-Jan-2013,3279,3.91,23.83,25.41,,16.2,6.45,12.67,14.97,29.97,25.27,0.654,0.788,15.42,-38.88,4
+Multi Cap,Principal Multi Cap Growth Fund-Direct Plan - Growth Option,119452,259.03,31-Dec-2021,02-Jan-2013,2214,93.08,23.48,25.27,,17.94,40.8,18.75,15.42,29.96,23.6,0.677,0.797,17.74,-38.67,5
+Large and Mid Cap,Bandhan Large & Mid Cap Fund - Direct Plan - Growth,118419,161.58,30-Apr-2026,02-Jan-2013,3287,11.42,28.51,27.89,,15.77,6.69,14.52,16.82,29.52,25.9,0.613,0.734,15.91,-38.54,1
+Large and Mid Cap,Invesco India Large & Mid Cap Fund - Direct Plan - Growth,120357,117.39,30-Apr-2026,02-Jan-2013,3279,6.77,25.77,27.12,,17.4,4.32,14.48,15.54,31.5,26.65,0.707,0.865,15.86,-35.31,2
+Large and Mid Cap,ICICI Prudential Large & Mid Cap Fund - Direct Plan - Growth,120596,1126.58,30-Apr-2026,02-Jan-2013,3279,5.39,24.93,27.93,,16.05,3.42,12.4,16.05,29.55,25.76,0.648,0.792,15.35,-37.42,3
+Large and Mid Cap,Axis Large & Mid Cap Fund - Direct Plan - Growth,145110,36.6,29-Apr-2026,26-Oct-2018,1855,8.03,18.49,29.06,,18.82,4.87,10.94,14.42,35.62,33.55,0.828,0.975,14.74,-31.87,4
+Large and Mid Cap,Kotak Large & Midcap Fund - Direct- Growth,120158,395.08,30-Apr-2026,02-Jan-2013,3279,2.48,23.03,27.04,,16.57,3.6,11.24,14.27,30.76,27.14,0.675,0.815,15.42,-36.03,5
+ELSS Tax Saving,BANK OF INDIA ELSS Tax Saver -Direct Plan- Growth,119351,191.44,30-Apr-2026,02-Jan-2013,3279,-3.12,19.65,29.72,,17.04,4.74,10.34,14.66,31.8,28.64,0.665,0.798,16.57,-31.69,1
+ELSS Tax Saving,DSP ELSS Tax Saver Fund - Direct Plan - Growth,119242,152.91,29-Apr-2026,02-Jan-2013,3280,0.82,20.11,26.82,,16.83,1.19,10.7,13.97,31.8,27.33,0.672,0.811,15.95,-37.16,2
+ELSS Tax Saving,JM ELSS Tax Saver Fund (Direct) - Growth Option,120494,54.48,30-Apr-2026,02-Jan-2013,3279,-4.62,19.7,26.19,,16.37,0.84,10.39,13.59,31.81,27.3,0.61,0.745,17.28,-37.39,3
+ELSS Tax Saving,HDFC ELSS Tax saver - Growth Option - Direct Plan,119060,1448.24,30-Apr-2026,01-Jan-2013,3280,-0.79,22.98,23.05,,14.2,-2.02,10.4,13.56,28.24,22.69,0.52,0.654,16.21,-44.14,4
+ELSS Tax Saving,BANDHAN ELSS Tax Saver Fund - Direct Plan - Growth,118473,174.32,30-Apr-2026,02-Jan-2013,3287,4.61,18.49,24.99,,16.65,2.3,8.26,13.43,31.74,27.62,0.666,0.8,15.76,-42.6,5
+Aggressive Hybrid,BANK OF INDIA MID & SMALL CAP EQUITY & DEBT FUND - DIRECT PLAN GROWTH,139527,44.08,30-Apr-2026,27-Jul-2016,2404,5.38,22.69,28.12,,16.25,8.88,12.65,16.09,28.9,30.15,0.689,0.807,14.48,-36.64,1
+Aggressive Hybrid,ICICI Prudential Equity & Debt Fund - Direct Plan - Growth,120251,445.69,30-Apr-2026,02-Jan-2013,3279,7.72,23.42,26.83,,16.74,4.46,11.39,14.88,29.89,26.63,0.844,1.034,11.96,-30.7,2
+Aggressive Hybrid,Edelweiss Aggressive Hybrid Fund-Direct Plan-Growth Option,118624,73.7,30-Apr-2026,08-Jan-2013,3277,5.29,20.99,24.6,,13.96,3.28,10.53,12.99,25.05,22.27,0.608,0.728,12.64,-28.6,3
+Aggressive Hybrid,Kotak Aggressive Hybrid Fund - Direct Plan -Growth,133035,74.75,30-Apr-2026,07-Nov-2014,2828,4.8,19.01,24.49,,13.2,4.79,9.92,12.56,23.43,22.78,0.569,0.662,12.21,-32.14,4
+Aggressive Hybrid,JM Aggressive Hybrid Fund (Direct) - Growth Option,120484,132.19,30-Apr-2026,03-Jan-2013,3284,-6.93,21.31,22.42,,13.26,-1.97,9.7,13.1,25.48,21.08,0.51,0.629,14.18,-36.57,5
+Balanced Advantage,HDFC Balanced Advantage Fund - Growth Plan - Direct Plan,118968,558.92,30-Apr-2026,01-Jan-2013,3280,2.7,24.11,23.75,,14.24,1.7,10.31,13.29,26.94,24.24,0.564,0.688,14.56,-34.2,1
+Balanced Advantage,Baroda BNP Paribas Balanced Advantage Fund-Direct Plan-Growth Option,145396,27.49,30-Apr-2026,20-Nov-2018,1835,8.12,17.38,22.32,,14.5,5.55,9.39,11.05,25.63,24.61,0.726,0.832,10.96,-20.72,2
+Balanced Advantage,Edelweiss Balanced Advantage Fund -Direct Plan-Growth Option,118615,59.05,30-Apr-2026,22-Jan-2013,3267,5.09,14.74,20.34,,12.26,3.7,7.79,9.82,20.71,19.41,0.64,0.83,8.99,-16.23,3
+Balanced Advantage,ICICI Prudential Balanced Advantage Fund - Direct Plan -  Growth,120377,84.81,30-Apr-2026,02-Jan-2013,3279,9.26,16.56,18.43,,12.62,4.43,8.4,9.63,21.19,19.25,0.677,0.75,8.99,-27.03,4
+Balanced Advantage,Aditya Birla Sun Life Balanced Advantage Fund - Direct Plan - Growth Option,131670,124.82,29-Apr-2026,13-Oct-2014,2842,10.08,16.3,18.32,,11.4,5.71,8.89,9.79,19.02,17.75,0.513,0.568,9.86,-26.36,5
+Index Nifty 50,BANDHAN Nifty 50 Index Fund-Direct Plan-Growth,118482,53.38,30-Apr-2026,02-Jan-2013,3287,3.17,12.9,19.03,,12.03,-0.97,5.82,9.2,22.07,20.68,0.4,0.505,16.02,-37.58,1
+Index Nifty 50,UTI Nifty 50 Index Fund - Growth Option- Direct,120716,167.77,30-Apr-2026,02-Jan-2013,3279,-0.88,12.74,18.73,,11.92,-1.22,5.94,9.14,22.01,20.58,0.393,0.494,16.16,-38.42,2
+Index Nifty 50,Franklin India INDEX FUND- NSE NIFTY 50 INDEX FUND- Direct - Growth,118581,203.99,30-Apr-2026,01-Jan-2013,3280,-0.87,12.66,18.34,,11.66,-1.21,5.91,9.02,21.41,19.89,0.381,0.481,15.96,-37.6,3
+Index Nifty 50,LIC MF Nifty 50 Index Fund-Direct Plan-Growth,120307,143.01,30-Apr-2026,02-Jan-2013,3269,-1.23,12.53,18.34,,11.53,-1.48,5.79,8.95,21.32,19.85,0.374,0.471,16.12,-38.11,4
+Index Nifty 50,Aditya Birla Sun Life Nifty 50 Index Fund - Growth - Direct Plan,119648,250.85,29-Apr-2026,02-Jan-2013,3278,0.98,12.2,18.56,,11.53,-0.42,6.17,9.21,21.18,19.74,0.373,0.47,16.05,-37.62,5
+Index Nifty Next 50,UTI Nifty Next 50 Index Fund - Direct Plan - Growth Option,143341,25.81,30-Apr-2026,29-Jun-2018,1928,-1.46,18.49,21.27,,12.81,5.16,10.9,12.47,27.27,26.48,0.405,0.475,18.99,-39.86,1
+Index Nifty Next 50,IDBI Nifty Next 50 Index Fund Growth Direct,118348,36.55,28-Jul-2023,02-Jan-2013,2603,9.43,21.88,21.01,,13.23,10.94,11.66,9.36,24.82,18.92,0.439,0.539,17.84,-40.59,2
+Index Nifty Next 50,ICICI Prudential Nifty Next 50 Index Fund - Direct Plan -  Growth,120684,64.7,30-Apr-2026,02-Jan-2013,3279,-1.91,18.3,20.85,,14.19,5.03,10.76,12.31,27.21,22.15,0.486,0.592,17.98,-41.09,3
+Index Nifty Next 50,Motilal Oswal Nifty Next 50 Index Fund - Direct plan - Growth,147796,24.98,30-Apr-2026,26-Dec-2019,1566,-1.45,18.52,,,15.6,5.13,10.91,,32.81,30.56,0.527,0.593,19.39,-35.56,4
+Index Nifty Next 50,DSP Nifty Next 50 Index Fund - Direct Plan - Growth,146381,27.88,29-Apr-2026,21-Feb-2019,1768,1.82,18.3,,,15.34,6.55,11.33,,30.94,29.18,0.523,0.602,19.08,-36.02,5
+Index Nifty 100,Axis Nifty 100 Index Fund - Direct Plan - Growth Option,147666,22.2,30-Apr-2026,23-Oct-2019,1616,3.26,13.98,,,13.06,0.11,6.49,,27.66,25.78,0.431,0.495,17.5,-37.03,1
+Index Nifty 100,BANDHAN NIFTY 100 INDEX FUND - DIRECT PLAN - GROWTH,149832,14.87,30-Apr-2026,25-Feb-2022,1035,3.34,,,,10.73,0.16,,,23.48,,0.352,0.476,13.71,-17.26,2
+Index Nifty 100,HDFC NIFTY 100 Index Fund - Direct Plan - Growth Option,149868,14.79,30-Apr-2026,23-Feb-2022,1029,-1.13,,,,9.83,-0.22,,,23.28,,0.293,0.387,14.01,-17.34,3
+Sectoral IT,Franklin India Technology Fund - Direct - Growth,118537,496.43,29-Apr-2026,01-Jan-2013,3279,-12.02,9.01,25.6,,17.0,-10.39,5.72,11.1,31.23,28.13,0.659,0.879,16.67,-30.75,1
+Sectoral IT,Tata Digital India Fund-Direct Plan-Growth,135800,45.98,30-Apr-2026,29-Dec-2015,2547,-24.13,2.97,25.0,,15.89,-15.46,0.94,9.65,39.61,39.51,0.554,0.752,18.69,-33.27,2
+Sectoral IT,ICICI Prudential Technology Fund - Direct Plan -  Growth,120594,189.88,29-Apr-2026,02-Jan-2013,3278,-15.35,2.27,26.13,,18.63,-12.76,1.68,10.52,37.46,33.01,0.705,0.929,17.93,-35.09,3
+Sectoral IT,Aditya Birla Sun Life Digital India Fund - Growth - Direct Plan,120539,162.94,29-Apr-2026,02-Jan-2013,3278,-17.99,2.94,25.21,,17.89,-13.29,0.81,9.46,34.91,32.88,0.67,0.892,17.87,-34.5,4
+Sectoral IT,SBI Retirement Benefit Fund - Aggressive Plan - Direct Plan - Growth,148683,20.66,30-Apr-2026,17-Feb-2021,1288,0.21,16.37,,,14.66,0.24,6.8,,24.7,22.51,0.632,0.821,13.11,-17.91,5
+Sectoral Banking,SBI BANKING & FINANCIAL SERVICES FUND - DIRECT PLAN - GROWTH,133859,48.1,30-Apr-2026,05-Mar-2015,2755,16.83,22.67,23.06,,14.87,5.1,12.02,12.92,28.97,24.75,0.488,0.59,19.71,-43.81,1
+Sectoral Banking,Tata Banking And Financial Services Fund-Direct Plan-Growth,135793,49.82,30-Apr-2026,29-Dec-2015,2547,8.77,20.33,23.3,,16.74,3.32,10.6,11.98,27.62,24.06,0.585,0.706,19.16,-41.58,2
+Sectoral Banking,Nippon India Banking & Financial Services Fund - Direct Plan Growth Plan - Growth Option,118589,684.64,30-Apr-2026,02-Jan-2013,3279,8.28,22.1,20.71,,13.74,3.39,10.63,12.88,29.16,23.35,0.423,0.528,21.18,-50.56,3
+Sectoral Banking,Baroda BNP Paribas Banking and Financial Services Fund - Direct - Growth Option,119333,53.25,30-Apr-2026,02-Jan-2013,3280,7.82,19.26,19.83,,11.69,2.81,10.26,10.89,23.85,19.73,0.335,0.424,21.15,-42.79,4
+Sectoral Banking,Aditya Birla Sun Life Banking and Financial Services Fund - Direct Plan - Growth,125597,69.6,29-Apr-2026,18-Dec-2013,3040,9.66,17.17,19.95,,17.1,5.72,10.03,11.59,26.57,22.11,0.57,0.689,20.87,-47.45,5
+Debt Liquid,Edelweiss Liquid Fund - Direct Plan - Growth Option,140196,3584.95,30-Apr-2026,27-Nov-2016,3315,6.33,7.04,6.14,,72.98,3.43,3.52,3.45,661.73,37.55,0.275,2128.2,2730.96,-0.15,1
+Debt Liquid,HDFC Liquid Fund - Growth Option - Direct Plan,119091,5446.16,30-Apr-2026,31-Dec-2012,4434,6.27,6.96,6.07,69.14,50.84,3.41,3.49,3.42,986.26,103.38,0.238,879.532,2361.41,-0.18,2
+Debt Liquid,JM Liquid Fund (Direct) - Growth Option,120406,75.66,30-Apr-2026,01-Jan-2013,4117,6.45,7.94,6.6,7.74,6.84,3.58,4.06,3.83,8.11,7.74,-5.837,-1.359,0.19,-0.18,3
+Debt Liquid,HSBC Liquid Fund -  Growth Direct,120038,2763.0,30-Apr-2026,01-Jan-2013,4198,6.27,7.19,6.42,7.45,6.82,3.39,3.6,3.7,7.91,7.63,-5.998,-1.556,0.2,-0.27,4
+Debt Liquid,BNP PARIBAS LIQUID FUND -- DIRECT PLAN - GROWTH OPTION,130479,3271.6,13-Mar-2022,29-Jun-2014,2329,4.17,6.11,7.18,,6.46,2.27,2.55,3.16,7.94,8.18,-5.827,-2.186,0.22,-0.21,5
+Debt Short Duration,Invesco India Short Duration Fund - Direct Plan - Growth,120560,4099.16,30-Apr-2026,02-Jan-2013,3215,10.57,9.59,11.02,,51.86,4.67,5.42,5.24,290.25,25.17,0.28,538.338,2774.8,-2.82,1
+Debt Short Duration,ICICI Prudential Short Term Fund - Direct Plan - Growth Option,120754,68.89,30-Apr-2026,02-Jan-2013,3216,11.54,11.04,12.41,,8.42,5.42,6.03,6.0,13.28,12.84,1.222,1.194,1.61,-3.38,2
+Debt Short Duration,Aditya Birla Sun Life Short Term Fund - Growth - Direct Plan,119498,53.87,29-Apr-2026,02-Jan-2013,3216,11.17,10.63,11.99,,8.48,5.12,5.83,5.81,13.15,12.62,1.253,1.2,1.61,-2.75,3
+Debt Short Duration,BNP Paribas Short Term Fund - Direct Plan - Growth Option,120131,26.98,13-Mar-2022,02-Jan-2013,2219,8.16,10.91,12.26,,8.13,3.55,5.41,5.86,13.08,12.61,0.816,0.529,2.07,-3.9,4
+Debt Short Duration,Axis Short Duration Fund - Direct Plan - Growth Option,120510,35.34,30-Apr-2026,02-Jan-2013,3222,11.36,10.49,11.79,,8.09,4.95,5.76,5.71,12.69,12.24,1.107,1.012,1.47,-2.6,5
+Debt Corporate Bond,Invesco India Corporate Bond Fund - Direct Plan - Growth,120497,3528.35,30-Apr-2026,02-Jan-2013,3215,9.94,9.44,11.35,,51.58,4.19,5.29,5.23,283.39,25.02,0.28,338.821,2778.3,-4.69,1
+Debt Corporate Bond,ICICI Prudential Corporate Bond Fund - Direct Plan - Growth,120692,32.66,30-Apr-2026,03-Jan-2013,3216,10.8,10.44,11.75,,8.07,4.95,5.71,5.66,12.6,12.17,1.374,1.322,1.18,-2.01,2
+Debt Corporate Bond,Nippon India Corporate Bond Fund - Direct Plan Growth Plan - Growth Option,118814,65.48,30-Apr-2026,02-Jan-2013,3215,10.52,10.45,11.32,,7.86,4.59,5.68,5.61,12.33,11.88,1.294,1.042,1.09,-1.7,3
+Debt Corporate Bond,Aditya Birla Sun Life Corporate Bond Fund - Growth - Direct Plan,119533,118.8,29-Apr-2026,02-Jan-2013,3216,9.59,9.86,11.63,,8.01,4.07,5.35,5.43,12.68,12.27,1.134,1.112,1.38,-2.38,4
+Debt Corporate Bond,HDFC Corporate Bond Fund - Growth Option - Direct Plan,118987,34.34,30-Apr-2026,01-Jan-2013,3218,9.3,9.62,11.6,,7.91,3.87,5.28,5.36,12.61,12.2,0.824,0.736,1.78,-4.0,5
+International,Motilal Oswal Nasdaq 100 Fund of Fund- Direct Plan Growth,145552,63.16,30-Apr-2026,03-Dec-2018,1826,72.74,34.65,43.25,,27.41,46.98,30.06,24.95,42.23,32.56,0.919,1.259,22.72,-30.35,1
+International,ICICI Prudential US Bluechip Equity Fund - Direct Plan -  Growth,120186,81.75,29-Apr-2026,03-Jan-2013,3172,14.5,19.45,24.0,,16.27,11.48,11.76,12.75,24.68,24.64,0.624,0.857,17.67,-24.65,2
+International,Nippon India US Equity Opportunities Fund- Direct Plan- Growth Plan- Growth Option,134923,44.07,29-Apr-2026,28-Jul-2015,2571,21.13,17.59,23.36,,15.1,12.22,13.43,12.87,26.75,25.04,0.532,0.674,19.11,-30.78,3
+International,Aditya Birla Sun Life US Equity Passive FOF-Direct-Growth,149291,21.16,29-Apr-2026,08-Nov-2021,1102,51.32,28.47,,,18.22,30.12,23.6,,40.94,,0.604,0.87,21.4,-28.94,4
+International,Kotak US Equity Fund - Direct Plan - Growth option,133831,20.13,24-Feb-2020,02-Feb-2015,1173,19.89,19.18,,,12.55,15.32,11.93,,19.52,17.99,0.542,0.709,13.44,-22.42,5
