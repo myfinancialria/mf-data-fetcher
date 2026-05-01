@@ -256,7 +256,7 @@ def compute_all_metrics(hist_df, scheme_code, scheme_name, category):
         "Fund Name":           scheme_name,
         "Scheme Code":         scheme_code,
         "Latest NAV (Rs)":     round(nav.iloc[-1], 2),
-        "NAV Date":            nav.index[-1].strftime("%d-%b-%Y"),
+        "NAV Date":            pd.Timestamp(nav.index[-1]).strftime("%d-%b-%Y"),
         "History Days":        num_days,
         # Returns — populated as history grows
         "30D Return (%)":      momentum_30d(nav),
