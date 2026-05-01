@@ -81,7 +81,9 @@ def download_db():
 
 def get_relevant_schemes(conn):
     print("\nFinding relevant Direct Growth funds...")
-    df = pd.read_sql_query("SELECT DISTINCT scheme_code, name FROM securities WHERE name IS NOT NULL", conn)
+    # schemes table has: scheme_code, name
+    # securities table has: isin, type, scheme_code (no name column)
+    df = pd.read_sql_query("SELECT scheme_code, name FROM schemes WHERE name IS NOT NULL", conn)
     print(f"  Total securities: {len(df):,}")
     categorized = {cat[0]: [] for cat in CATEGORIES}
     for _, row in df.iterrows():
