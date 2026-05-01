@@ -1,0 +1,37 @@
+name: Daily MF NAV Fetch
+
+on:
+  schedule:
+    - cron: "30 17 * * 1-5"  # 11:00 PM IST (5:30 PM UTC) — Weekdays only
+  workflow_dispatch:           # Allows you to run it manually anytime
+
+jobs:
+  fetch-nav:
+    runs-on: ubuntu-latest
+
+    permissions:
+      contents: write
+
+    steps:
+
+      - name: 📥 Download your repository
+        uses: actions/checkout@v3
+
+      - name: 🐍 Setup Python
+        uses: actions/setup-python@v4
+        with:
+          python-version: "3.11"
+
+      - name: 📦 Install required libraries
+        run: pip install requests pandas
+
+      - name: 🚀 Run the MF fetch script
+        run: python fetch_mf.py
+
+      - name: 💾 Save the data back to GitHub
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "github-actions[bot]@users.noreply.github.com"
+          git add nav_data.csv
+          git diff --staged --quiet || git commit -m "📊 MF NAV updated - $(date +'%Y-%m-%d')"
+          git push
