@@ -1,38 +1,39 @@
-name: MF Complete Rankings - All Categories
+name: MF Expert Rankings - All Metrics + Dashboard
 
 on:
   schedule:
-    - cron: "30 17 * * 1-5"
-  workflow_dispatch:
+    - cron: "30 17 * * 1-5"   # 11:00 PM IST (5:30 PM UTC) — Weekdays only
+  workflow_dispatch:            # Run manually anytime from Actions tab
 
 jobs:
-  rank-all-funds:
+  rank-expert:
     runs-on: ubuntu-latest
-    timeout-minutes: 60
+    timeout-minutes: 90         # Up to 90 mins for full computation
 
     permissions:
       contents: write
 
     steps:
 
-      - name: Checkout Repository
+      - name: 📥 Checkout Repository
         uses: actions/checkout@v3
 
-      - name: Setup Python 3.11
+      - name: 🐍 Setup Python 3.11
         uses: actions/setup-python@v4
         with:
           python-version: "3.11"
 
-      - name: Install Libraries
-        run: pip install requests pandas numpy openpyxl zstandard
+      - name: 📦 Install Dependencies
+        run: |
+          pip install requests pandas numpy openpyxl zstandard
 
-      - name: Run Complete MF Ranker
+      - name: 🚀 Run Expert MF Ranker
         run: python all_funds_ranker.py
 
-      - name: Commit and Push Results
+      - name: 💾 Commit & Push Results
         run: |
           git config user.name  "github-actions[bot]"
           git config user.email "github-actions[bot]@users.noreply.github.com"
-          git add output/
-          git diff --staged --quiet || git commit -m "MF Rankings Updated - $(date +'%d %b %Y')"
+          git add output/ dashboard/
+          git diff --staged --quiet || git commit -m "🏆 Expert Rankings Updated — $(date +'%d %b %Y %H:%M') IST"
           git push
