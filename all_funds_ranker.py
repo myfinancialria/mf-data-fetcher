@@ -74,42 +74,103 @@ TRADING_DAYS   = 252
 # ── Download + Open DB ───────────────────────────────────────────
 def download_db():
     print("📥 Downloading historical MF database …")
-    r = requests.get(DB_URL, stream=True, timeout=300)
-    r.raise_for_status()
-    zst_bytes = r.content
-    print(f"   Downloaded {len(zst_bytes)/1e6:.1f} MB")
+    zst_path = "funds.db.zst"
 
-    # Decompress with zstandard if available, else try python-zstandard
+    # Stream download to disk (avoids loading 369 MB into RAM)
+    with requests.get(DB_URL, stream=True, timeout=600) as r:
+        r.raise_for_status()
+        total = 0
+        with open(zst_path, "wb") as f:
+            for chunk in r.iter_content(chunk_size=1024 * 1024):
+                f.write(chunk)
+                total += len(chunk)
+        print(f"   Downloaded {total/1e6:.1f} MB → {zst_path}")
+
+    # Decompress using streaming (handles large files correctly)
+    print("   Decompressing …")
     try:
         import zstandard as zstd
         dctx = zstd.ZstdDecompressor()
-        with open(DB_PATH, "wb") as f:
-            f.write(dctx.decompress(zst_bytes))
+        with open(zst_path, "rb") as fin, open(DB_PATH, "wb") as fout:
+            dctx.copy_stream(fin, fout, write_size=1024 * 1024)
     except ImportError:
-        # Fallback: use system zstd via subprocess
-        import subprocess, tempfile
-        with tempfile.NamedTemporaryFile(suffix=".zst", delete=False) as tmp:
-            tmp.write(zst_bytes)
-            tmp_path = tmp.name
-        subprocess.run(["zstd", "-d", tmp_path, "-o", DB_PATH, "-f"], check=True)
-        os.unlink(tmp_path)
-    print(f"   Database ready at {DB_PATH}")
+        # Fallback: system zstd binary (pre-installed on ubuntu-latest)
+        import subprocess
+        subprocess.run(["zstd", "-d", zst_path, "-o", DB_PATH, "-f"], check=True)
+
+    os.unlink(zst_path)
+
+    # Verify it is a valid SQLite file
+    db_size = os.path.getsize(DB_PATH) / 1e6
+    print(f"   Database ready: {DB_PATH}  ({db_size:.0f} MB)")
+
+    # ── Schema inspection: print actual table names for debugging ──
+    conn_tmp = sqlite3.connect(DB_PATH)
+    cur = conn_tmp.cursor()
+    tables = [r[0] for r in cur.execute("SELECT name FROM sqlite_master WHERE type='table'").fetchall()]
+    print(f"   Tables found: {tables}")
+    if tables:
+        for t in tables[:3]:
+            cols = [r[1] for r in cur.execute(f"PRAGMA table_info({t})").fetchall()]
+            print(f"   {t}: {cols}")
+    conn_tmp.close()
+
+    if not tables:
+        raise RuntimeError("Decompressed file has no tables — possibly corrupt. Check DB_URL.")
 
 
-def load_nav_series(conn, scheme_ids: list[int]) -> dict[int, pd.Series]:
+def get_table_names(conn) -> dict:
+    """Auto-detect actual table/column names in the DB."""
+    cur = conn.cursor()
+    tables = [r[0] for r in cur.execute(
+        "SELECT name FROM sqlite_master WHERE type='table'").fetchall()]
+
+    # Map logical names → actual names
+    fund_table = next((t for t in tables if t.lower() in ("funds", "schemes", "scheme", "mutual_funds")), None)
+    nav_table  = next((t for t in tables if t.lower() in ("nav", "navs", "nav_data", "prices")), None)
+
+    if fund_table is None or nav_table is None:
+        raise RuntimeError(f"Cannot find fund/nav tables. Tables present: {tables}")
+
+    # Get column names
+    fund_cols = [r[1] for r in cur.execute(f"PRAGMA table_info({fund_table})").fetchall()]
+    nav_cols  = [r[1] for r in cur.execute(f"PRAGMA table_info({nav_table})").fetchall()]
+
+    # Map logical column names
+    id_col   = next((c for c in fund_cols if c.lower() in ("id", "scheme_id", "isin")), fund_cols[0])
+    name_col = next((c for c in fund_cols if c.lower() in ("name", "scheme_name", "fund_name")), fund_cols[1])
+
+    nav_id_col  = next((c for c in nav_cols if c.lower() in ("scheme_id", "fund_id", "id")), nav_cols[0])
+    date_col    = next((c for c in nav_cols if c.lower() in ("date", "nav_date", "price_date")), nav_cols[1])
+    price_col   = next((c for c in nav_cols if c.lower() in ("nav", "price", "close", "value")), nav_cols[2])
+
+    print(f"   Using: {fund_table}({id_col}, {name_col}) | {nav_table}({nav_id_col}, {date_col}, {price_col})")
+    return dict(
+        fund_table=fund_table, nav_table=nav_table,
+        id_col=id_col, name_col=name_col,
+        nav_id_col=nav_id_col, date_col=date_col, price_col=price_col
+    )
+
+
+def load_nav_series(conn, scheme_ids: list[int], schema: dict) -> dict[int, pd.Series]:
     """Load NAV time series for a list of scheme IDs."""
     if not scheme_ids:
         return {}
+    nt  = schema["nav_table"]
+    nid = schema["nav_id_col"]
+    dt  = schema["date_col"]
+    pc  = schema["price_col"]
     placeholders = ",".join(["?"] * len(scheme_ids))
     df = pd.read_sql_query(
-        f"SELECT scheme_id, date, nav FROM nav WHERE scheme_id IN ({placeholders}) ORDER BY date",
-        conn, params=scheme_ids, parse_dates=["date"]
+        f"SELECT {nid}, {dt}, {pc} FROM {nt} WHERE {nid} IN ({placeholders}) ORDER BY {dt}",
+        conn, params=scheme_ids, parse_dates=[dt]
     )
+    df.columns = ["scheme_id", "date", "nav"]
     result = {}
     for sid, grp in df.groupby("scheme_id"):
         s = grp.set_index("date")["nav"].sort_index().astype(float)
         s = s[~s.index.duplicated()]
-        result[sid] = s
+        result[int(sid)] = s
     return result
 
 
@@ -391,9 +452,15 @@ def main():
 
     download_db()
 
-    conn = sqlite3.connect(DB_PATH)
+    conn   = sqlite3.connect(DB_PATH)
+    schema = get_table_names(conn)          # ← auto-detect table/column names
+
+    ft  = schema["fund_table"]
+    idc = schema["id_col"]
+    nc  = schema["name_col"]
+
     print("📋 Loading scheme list …")
-    funds_df = pd.read_sql_query("SELECT id, name FROM funds", conn)
+    funds_df = pd.read_sql_query(f"SELECT {idc} AS id, {nc} AS name FROM {ft}", conn)
 
     # Filter: Direct Growth equity/hybrid funds
     direct = funds_df[
@@ -424,7 +491,7 @@ def main():
     bench_nav = None
     bench_dr  = None
     if bench_id:
-        nav_map   = load_nav_series(conn, [bench_id])
+        nav_map   = load_nav_series(conn, [bench_id], schema)
         bench_nav = nav_map.get(bench_id)
         if bench_nav is not None:
             bench_dr = bench_nav.pct_change().dropna()
@@ -438,7 +505,7 @@ def main():
 
     for start in range(0, len(all_ids), BATCH):
         batch = all_ids[start:start + BATCH]
-        nav_map = load_nav_series(conn, batch)
+        nav_map = load_nav_series(conn, batch, schema)
         for sid in batch:
             nav  = nav_map.get(sid)
             name = id_to_name[sid]
