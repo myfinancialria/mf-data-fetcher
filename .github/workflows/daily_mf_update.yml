@@ -1,0 +1,76 @@
+name: 🔄 Daily MF Data Update
+
+on:
+  schedule:
+    - cron: "30 17 * * 1-5"   # 11:00 PM IST (5:30 PM UTC) — Monday to Friday
+  workflow_dispatch:            # Run manually anytime from GitHub
+
+jobs:
+  update-mf-data:
+    runs-on: ubuntu-latest
+    timeout-minutes: 60
+
+    permissions:
+      contents: write
+
+    steps:
+
+      - name: 📥 Checkout repository
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 1
+
+      - name: 🐍 Setup Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+          cache: "pip"
+
+      - name: 📦 Install dependencies
+        run: pip install requests pandas numpy yfinance openpyxl tqdm
+
+      - name: 📂 Create data folders
+        run: |
+          mkdir -p data/nav_history
+
+      - name: 📥 Download cached NAV history (from previous run)
+        uses: actions/cache@v4
+        with:
+          path: data/nav_history
+          key: nav-history-${{ runner.os }}-${{ github.run_number }}
+          restore-keys: |
+            nav-history-${{ runner.os }}-
+
+      - name: 🌐 Download complete scheme list (if missing)
+        run: |
+          if [ ! -f data/all_schemes.csv ]; then
+            echo "Fetching scheme list from mfapi.in..."
+            python -c "
+          import requests, pandas as pd, os
+          os.makedirs('data', exist_ok=True)
+          r = requests.get('https://api.mfapi.in/mf', timeout=30)
+          schemes = r.json()
+          df = pd.DataFrame(schemes)
+          df = df.rename(columns={'schemeCode':'scheme_code','schemeName':'scheme_name'})
+          df = df[['scheme_code','scheme_name']]
+          df['scheme_code'] = df['scheme_code'].astype(str)
+          df.to_csv('data/all_schemes.csv', index=False)
+          print(f'Saved {len(df)} schemes')
+          "
+          else
+            echo "Scheme list already exists"
+          fi
+
+      - name: 🔄 Run daily NAV update
+        run: python daily_update.py
+
+      - name: 💾 Commit updated data back to GitHub
+        run: |
+          git config user.name  "github-actions[bot]"
+          git config user.email "github-actions[bot]@users.noreply.github.com"
+          git add data/mf_complete_metrics.csv
+          git add data/mf_complete_metrics.xlsx
+          git add data/all_schemes.csv
+          git add data/daily_update.log
+          git diff --staged --quiet || git commit -m "📊 MF data updated — $(date +'%d %b %Y')"
+          git push
