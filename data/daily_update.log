@@ -96,3 +96,10 @@
 ⚙ Recomputing metrics for all funds...
 2026-06-05 19:19:25,948  
 ✅ Daily update complete! — 05 Jun 2026 07:19 PM
+2026-06-10 19:53:00,618  📡 Fetching today's NAV from AMFI...
+2026-06-10 19:53:03,544  ✅ Got 13,965 NAVs for 10 Jun 2026
+2026-06-10 19:53:40,662  📁 NAV files updated: 8,495 | Already current: 5,470
+2026-06-10 19:53:40,662  
+⚙ Recomputing metrics for all funds...
+2026-06-10 19:56:43,854  
+✅ Daily update complete! — 10 Jun 2026 07:56 PM
