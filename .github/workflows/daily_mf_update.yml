@@ -73,4 +73,7 @@ jobs:
           git add data/all_schemes.csv
           git add data/daily_update.log
           git diff --staged --quiet || git commit -m "📊 MF data updated — $(date +'%d %b %Y')"
-          git push
+          for i in 1 2 3 4 5; do
+            git pull --rebase --no-edit && git push && break
+            sleep $((10 * i))
+          done
